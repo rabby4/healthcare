@@ -34,3 +34,8 @@ export interface IPatientRegisterFromData {
 	password: string
 	patient: IPatientData
 }
+
+export interface IUserLogin {
+	email: string
+	password: string
+}

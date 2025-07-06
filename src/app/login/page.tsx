@@ -1,4 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+"use client"
 import assets from "@/assets"
+import { userLogin } from "@/services/actions/userLogin"
+import { storeUserInfo } from "@/services/auth.services"
+import { IUserLogin } from "@/types"
 import {
 	Box,
 	Button,
@@ -11,8 +16,25 @@ import {
 import Image from "next/image"
 import Link from "next/link"
 import React from "react"
+import { SubmitHandler, useForm } from "react-hook-form"
+import { toast } from "sonner"
 
 const LoginPage = () => {
+	const { register, handleSubmit } = useForm<IUserLogin>()
+	const onSubmit: SubmitHandler<IUserLogin> = async (values) => {
+		try {
+			const res = await userLogin(values)
+			if (res.success === true) {
+				toast.success(res.message)
+			}
+			if (res.data.accessToken) {
+				storeUserInfo({ accessToken: res.data.accessToken })
+			}
+		} catch (error: any) {
+			console.log(error)
+		}
+	}
+
 	return (
 		<Container>
 			<Stack
@@ -39,7 +61,7 @@ const LoginPage = () => {
 						</Box>
 					</Stack>
 					<Box>
-						<form>
+						<form onSubmit={handleSubmit(onSubmit)}>
 							<Grid container spacing={3} my={2}>
 								<Grid size={{ md: 6 }}>
 									<TextField
@@ -48,6 +70,7 @@ const LoginPage = () => {
 										variant="outlined"
 										size="small"
 										fullWidth
+										{...register("email")}
 									/>
 								</Grid>
 								<Grid size={{ md: 6 }}>
@@ -57,14 +80,15 @@ const LoginPage = () => {
 										variant="outlined"
 										size="small"
 										fullWidth
+										{...register("password")}
 									/>
 								</Grid>
 							</Grid>
 							<Typography component="p" textAlign={"right"}>
 								<Link href={"/"}>Forget Password?</Link>
 							</Typography>
-							<Button fullWidth sx={{ my: 2 }}>
-								Register
+							<Button type="submit" fullWidth sx={{ my: 2 }}>
+								Login
 							</Button>
 							<Typography component="p">
 								Don&apos;t have an account?{" "}
