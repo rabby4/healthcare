@@ -1,4 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+"use client"
 import assets from "@/assets"
+import { registerPatient } from "@/services/actions/registerPatient"
+import { IPatientRegisterFromData } from "@/types"
+import { modifyPayload } from "@/utils/modifyPayload"
 import {
 	Box,
 	Button,
@@ -10,9 +15,26 @@ import {
 } from "@mui/material"
 import Image from "next/image"
 import Link from "next/link"
-import React from "react"
+import { useRouter } from "next/navigation"
+import { useForm, SubmitHandler } from "react-hook-form"
+import { toast } from "sonner"
 
 const RegisterPage = () => {
+	const router = useRouter()
+	const { register, handleSubmit } = useForm<IPatientRegisterFromData>()
+	const onSubmit: SubmitHandler<IPatientRegisterFromData> = async (values) => {
+		const data = modifyPayload(values)
+		try {
+			const res = await registerPatient(data)
+			if (res?.data?.id) {
+				toast.success(res?.message)
+				router.push("/login")
+			}
+		} catch (error: any) {
+			console.log(error)
+		}
+	}
+
 	return (
 		<Container>
 			<Stack
@@ -39,7 +61,7 @@ const RegisterPage = () => {
 						</Box>
 					</Stack>
 					<Box>
-						<form>
+						<form onSubmit={handleSubmit(onSubmit)}>
 							<Grid container spacing={3} my={2}>
 								<Grid size={{ md: 12 }}>
 									<TextField
@@ -48,6 +70,7 @@ const RegisterPage = () => {
 										variant="outlined"
 										size="small"
 										fullWidth
+										{...register("patient.name")}
 									/>
 								</Grid>
 								<Grid size={{ md: 6 }}>
@@ -57,6 +80,7 @@ const RegisterPage = () => {
 										variant="outlined"
 										size="small"
 										fullWidth
+										{...register("patient.email")}
 									/>
 								</Grid>
 								<Grid size={{ md: 6 }}>
@@ -66,6 +90,7 @@ const RegisterPage = () => {
 										variant="outlined"
 										size="small"
 										fullWidth
+										{...register("password")}
 									/>
 								</Grid>
 								<Grid size={{ md: 6 }}>
@@ -75,6 +100,7 @@ const RegisterPage = () => {
 										variant="outlined"
 										size="small"
 										fullWidth
+										{...register("patient.contactNumber")}
 									/>
 								</Grid>
 								<Grid size={{ md: 6 }}>
@@ -84,10 +110,11 @@ const RegisterPage = () => {
 										variant="outlined"
 										size="small"
 										fullWidth
+										{...register("patient.address")}
 									/>
 								</Grid>
 							</Grid>
-							<Button fullWidth sx={{ my: 2 }}>
+							<Button type="submit" fullWidth sx={{ my: 2 }}>
 								Register
 							</Button>
 							<Typography component="p">

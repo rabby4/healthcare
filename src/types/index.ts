@@ -1,9 +1,9 @@
-export type TSpecialties = {
+export interface ISpecialties {
 	id: string
 	title: string
 	icon: string
 }
-export type TDoctor = {
+export interface IDoctor {
 	id: string
 	name: string
 	email: string
@@ -21,4 +21,16 @@ export type TDoctor = {
 	isDeleted: boolean
 	createdAt: Date
 	updatedAt: Date
+}
+
+interface IPatientData {
+	name: string
+	email: string
+	contactNumber: string
+	address: string
+}
+
+export interface IPatientRegisterFromData {
+	password: string
+	patient: IPatientData
 }

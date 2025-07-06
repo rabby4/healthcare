@@ -68,7 +68,7 @@ const LoginPage = () => {
 							</Button>
 							<Typography component="p">
 								Don&apos;t have an account?{" "}
-								<Link href={"/login"} className="text-blue-500">
+								<Link href={"/register"} className="text-blue-500">
 									Register
 								</Link>
 							</Typography>
