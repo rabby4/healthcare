@@ -1,12 +1,16 @@
 "use client"
-import { getUserInfo } from "@/services/auth.services"
-import { Box, Button, Container, Stack, Typography } from "@mui/material"
+
+import { Box, Container, Stack, Typography } from "@mui/material"
+import dynamic from "next/dynamic"
 import Link from "next/link"
 import React from "react"
 
 const Navbar = () => {
-	const userInfo = getUserInfo()
-	console.log(userInfo)
+	const AuthButton = dynamic(
+		() => import("@/components/ui/authButton/AuthButton"),
+		{ ssr: false }
+	)
+
 	return (
 		<Container>
 			<Stack
@@ -36,15 +40,7 @@ const Navbar = () => {
 					<Typography>Diagnostics</Typography>
 					<Typography>NGOs</Typography>
 				</Stack>
-				{userInfo?.id ? (
-					<Button href="/login" color="error">
-						Log Out
-					</Button>
-				) : (
-					<Button component={Link} href="/login">
-						Login
-					</Button>
-				)}
+				<AuthButton />
 			</Stack>
 		</Container>
 	)

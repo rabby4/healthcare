@@ -2,6 +2,8 @@
 "use client"
 import assets from "@/assets"
 import { registerPatient } from "@/services/actions/registerPatient"
+import { userLogin } from "@/services/actions/userLogin"
+import { storeUserInfo } from "@/services/auth.services"
 import { IPatientRegisterFromData } from "@/types"
 import { modifyPayload } from "@/utils/modifyPayload"
 import {
@@ -28,7 +30,15 @@ const RegisterPage = () => {
 			const res = await registerPatient(data)
 			if (res?.data?.id) {
 				toast.success(res?.message)
-				router.push("/login")
+				const result = await userLogin({
+					password: values.password,
+					email: values.patient.email,
+				})
+
+				if (result.data.accessToken) {
+					storeUserInfo({ accessToken: result.data.accessToken })
+					router.push("/")
+				}
 			}
 		} catch (error: any) {
 			console.log(error)

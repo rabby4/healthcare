@@ -15,20 +15,21 @@ import {
 } from "@mui/material"
 import Image from "next/image"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import React from "react"
 import { SubmitHandler, useForm } from "react-hook-form"
 import { toast } from "sonner"
 
 const LoginPage = () => {
 	const { register, handleSubmit } = useForm<IUserLogin>()
+	const router = useRouter()
 	const onSubmit: SubmitHandler<IUserLogin> = async (values) => {
 		try {
 			const res = await userLogin(values)
-			if (res.success === true) {
-				toast.success(res.message)
-			}
 			if (res.data.accessToken) {
+				toast.success(res.message)
 				storeUserInfo({ accessToken: res.data.accessToken })
+				router.push("/")
 			}
 		} catch (error: any) {
 			console.log(error)
