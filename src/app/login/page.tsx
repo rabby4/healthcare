@@ -1,29 +1,22 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 import assets from "@/assets"
+import ProForm from "@/components/form/ProForm"
+import ProInput from "@/components/form/ProInput"
 import { userLogin } from "@/services/actions/userLogin"
 import { storeUserInfo } from "@/services/auth.services"
-import { IUserLogin } from "@/types"
-import {
-	Box,
-	Button,
-	Container,
-	Grid,
-	Stack,
-	TextField,
-	Typography,
-} from "@mui/material"
+import { Box, Button, Container, Grid, Stack, Typography } from "@mui/material"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import React from "react"
-import { SubmitHandler, useForm } from "react-hook-form"
+import { FieldValues } from "react-hook-form"
 import { toast } from "sonner"
 
 const LoginPage = () => {
-	const { register, handleSubmit } = useForm<IUserLogin>()
 	const router = useRouter()
-	const onSubmit: SubmitHandler<IUserLogin> = async (values) => {
+
+	const handleLogin = async (values: FieldValues) => {
 		try {
 			const res = await userLogin(values)
 			if (res.data.accessToken) {
@@ -62,26 +55,24 @@ const LoginPage = () => {
 						</Box>
 					</Stack>
 					<Box>
-						<form onSubmit={handleSubmit(onSubmit)}>
+						<ProForm onSubmit={handleLogin}>
 							<Grid container spacing={3} my={2}>
 								<Grid size={{ md: 6 }}>
-									<TextField
+									<ProInput
+										name="email"
 										label="Email"
 										type="email"
-										variant="outlined"
-										size="small"
 										fullWidth
-										{...register("email")}
+										required={true}
 									/>
 								</Grid>
 								<Grid size={{ md: 6 }}>
-									<TextField
+									<ProInput
+										name="password"
 										label="Password"
 										type="password"
-										variant="outlined"
-										size="small"
 										fullWidth
-										{...register("password")}
+										required={true}
 									/>
 								</Grid>
 							</Grid>
@@ -97,7 +88,7 @@ const LoginPage = () => {
 									Register
 								</Link>
 							</Typography>
-						</form>
+						</ProForm>
 					</Box>
 				</Box>
 			</Stack>

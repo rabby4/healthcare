@@ -1,30 +1,23 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 import assets from "@/assets"
+import ProForm from "@/components/form/ProForm"
+import ProInput from "@/components/form/ProInput"
 import { registerPatient } from "@/services/actions/registerPatient"
 import { userLogin } from "@/services/actions/userLogin"
 import { storeUserInfo } from "@/services/auth.services"
-import { IPatientRegisterFromData } from "@/types"
 import { modifyPayload } from "@/utils/modifyPayload"
-import {
-	Box,
-	Button,
-	Container,
-	Grid,
-	Stack,
-	TextField,
-	Typography,
-} from "@mui/material"
+import { Box, Button, Container, Grid, Stack, Typography } from "@mui/material"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { useForm, SubmitHandler } from "react-hook-form"
+import { FieldValues } from "react-hook-form"
 import { toast } from "sonner"
 
 const RegisterPage = () => {
 	const router = useRouter()
-	const { register, handleSubmit } = useForm<IPatientRegisterFromData>()
-	const onSubmit: SubmitHandler<IPatientRegisterFromData> = async (values) => {
+
+	const handleRegister = async (values: FieldValues) => {
 		const data = modifyPayload(values)
 		try {
 			const res = await registerPatient(data)
@@ -71,56 +64,50 @@ const RegisterPage = () => {
 						</Box>
 					</Stack>
 					<Box>
-						<form onSubmit={handleSubmit(onSubmit)}>
+						<ProForm onSubmit={handleRegister}>
 							<Grid container spacing={3} my={2}>
 								<Grid size={{ md: 12 }}>
-									<TextField
+									<ProInput
 										label="Name"
-										type="text"
-										variant="outlined"
-										size="small"
 										fullWidth
-										{...register("patient.name")}
+										name="patient.name"
+										required={true}
 									/>
 								</Grid>
 								<Grid size={{ md: 6 }}>
-									<TextField
+									<ProInput
 										label="Email"
-										type="email"
-										variant="outlined"
-										size="small"
+										type="Email"
 										fullWidth
-										{...register("patient.email")}
+										name="patient.email"
+										required={true}
 									/>
 								</Grid>
 								<Grid size={{ md: 6 }}>
-									<TextField
+									<ProInput
 										label="Password"
 										type="password"
-										variant="outlined"
-										size="small"
 										fullWidth
-										{...register("password")}
+										name="password"
+										required={true}
 									/>
 								</Grid>
 								<Grid size={{ md: 6 }}>
-									<TextField
+									<ProInput
 										label="Contact Number"
 										type="tel"
-										variant="outlined"
-										size="small"
 										fullWidth
-										{...register("patient.contactNumber")}
+										name="patient.contactNumber"
+										required={true}
 									/>
 								</Grid>
 								<Grid size={{ md: 6 }}>
-									<TextField
+									<ProInput
 										label="Address"
 										type="text"
-										variant="outlined"
-										size="small"
 										fullWidth
-										{...register("patient.address")}
+										name="patient.address"
+										required={true}
 									/>
 								</Grid>
 							</Grid>
@@ -133,7 +120,7 @@ const RegisterPage = () => {
 									Login
 								</Link>
 							</Typography>
-						</form>
+						</ProForm>
 					</Box>
 				</Box>
 			</Stack>
