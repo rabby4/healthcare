@@ -9,7 +9,7 @@ type TInputProps = {
 	fullWidth?: boolean
 	sx?: SxProps
 	placeholder?: string
-	required: boolean
+	required?: boolean
 }
 
 const ProInput = ({
@@ -19,7 +19,6 @@ const ProInput = ({
 	size = "small",
 	fullWidth,
 	sx,
-	placeholder,
 	required,
 }: TInputProps) => {
 	const { control } = useFormContext()
@@ -27,7 +26,7 @@ const ProInput = ({
 		<Controller
 			control={control}
 			name={name}
-			render={({ field }) => (
+			render={({ field, fieldState: { error } }) => (
 				<TextField
 					{...field}
 					sx={{ ...sx }}
@@ -38,6 +37,8 @@ const ProInput = ({
 					fullWidth={fullWidth}
 					placeholder={label}
 					required={required}
+					error={!!error?.message}
+					helperText={error?.message}
 				/>
 			)}
 		/>

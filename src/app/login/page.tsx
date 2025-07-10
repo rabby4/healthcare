@@ -12,6 +12,13 @@ import { useRouter } from "next/navigation"
 import React from "react"
 import { FieldValues } from "react-hook-form"
 import { toast } from "sonner"
+import z from "zod"
+import { zodResolver } from "@hookform/resolvers/zod"
+
+export const validationSchema = z.object({
+	email: z.string().email("Please enter a valid email address"),
+	password: z.string().min(6, "Password must be at least 6 characters"),
+})
 
 const LoginPage = () => {
 	const router = useRouter()
@@ -55,16 +62,14 @@ const LoginPage = () => {
 						</Box>
 					</Stack>
 					<Box>
-						<ProForm onSubmit={handleLogin}>
+						<ProForm
+							onSubmit={handleLogin}
+							resolver={zodResolver(validationSchema)}
+							defaultValues={{ email: "", password: "" }}
+						>
 							<Grid container spacing={3} my={2}>
 								<Grid size={{ md: 6 }}>
-									<ProInput
-										name="email"
-										label="Email"
-										type="email"
-										fullWidth
-										required={true}
-									/>
+									<ProInput name="email" label="Email" type="email" fullWidth />
 								</Grid>
 								<Grid size={{ md: 6 }}>
 									<ProInput
@@ -72,7 +77,6 @@ const LoginPage = () => {
 										label="Password"
 										type="password"
 										fullWidth
-										required={true}
 									/>
 								</Grid>
 							</Grid>
