@@ -7,12 +7,38 @@ import { registerPatient } from "@/services/actions/registerPatient"
 import { userLogin } from "@/services/actions/userLogin"
 import { storeUserInfo } from "@/services/auth.services"
 import { modifyPayload } from "@/utils/modifyPayload"
+import { zodResolver } from "@hookform/resolvers/zod"
 import { Box, Button, Container, Grid, Stack, Typography } from "@mui/material"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { FieldValues } from "react-hook-form"
 import { toast } from "sonner"
+import z from "zod"
+
+export const patientValidationSchema = z.object({
+	name: z.string().min(1, "Please enter your full name!"),
+	email: z.string().email("Please provide a valid email address"),
+	contactNumber: z
+		.string()
+		.regex(/^\d{11}$/, "Please provide a valid phone number"),
+	address: z.string().min(1, "Please enter your address"),
+})
+
+export const validationSchema = z.object({
+	password: z.string().min(6, "Password must be at least 6 characters!"),
+	patient: patientValidationSchema,
+})
+
+export const defaultValues = {
+	password: "",
+	patient: {
+		name: "",
+		email: "",
+		contactNumber: "",
+		address: "",
+	},
+}
 
 const RegisterPage = () => {
 	const router = useRouter()
@@ -64,15 +90,14 @@ const RegisterPage = () => {
 						</Box>
 					</Stack>
 					<Box>
-						<ProForm onSubmit={handleRegister}>
+						<ProForm
+							onSubmit={handleRegister}
+							resolver={zodResolver(validationSchema)}
+							defaultValues={defaultValues}
+						>
 							<Grid container spacing={3} my={2}>
 								<Grid size={{ md: 12 }}>
-									<ProInput
-										label="Name"
-										fullWidth
-										name="patient.name"
-										required={true}
-									/>
+									<ProInput label="Name" fullWidth name="patient.name" />
 								</Grid>
 								<Grid size={{ md: 6 }}>
 									<ProInput
@@ -80,7 +105,6 @@ const RegisterPage = () => {
 										type="Email"
 										fullWidth
 										name="patient.email"
-										required={true}
 									/>
 								</Grid>
 								<Grid size={{ md: 6 }}>
@@ -89,7 +113,6 @@ const RegisterPage = () => {
 										type="password"
 										fullWidth
 										name="password"
-										required={true}
 									/>
 								</Grid>
 								<Grid size={{ md: 6 }}>
@@ -98,7 +121,6 @@ const RegisterPage = () => {
 										type="tel"
 										fullWidth
 										name="patient.contactNumber"
-										required={true}
 									/>
 								</Grid>
 								<Grid size={{ md: 6 }}>
@@ -107,7 +129,6 @@ const RegisterPage = () => {
 										type="text"
 										fullWidth
 										name="patient.address"
-										required={true}
 									/>
 								</Grid>
 							</Grid>
