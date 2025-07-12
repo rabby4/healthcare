@@ -1,3 +1,8 @@
+/* eslint-disable @typescript-eslint/no-empty-object-type */
+import { USER_ROLE } from "@/constants/role"
+import { SvgIconTypeMap } from "@mui/material"
+import { OverridableComponent } from "@mui/material/OverridableComponent"
+
 export interface ISpecialties {
 	id: string
 	title: string
@@ -40,8 +45,18 @@ export interface IUserLogin {
 	password: string
 }
 
-export type IMeta = {
+export interface IMeta {
 	page: number
 	limit: number
 	total: number
+}
+
+export type UserRole = keyof typeof USER_ROLE
+
+export interface DrawerItem {
+	title: string
+	path: string
+	parentPath?: string
+	icon?: OverridableComponent<SvgIconTypeMap<{}, "svg">> & { muiName: string }
+	child?: DrawerItem[]
 }

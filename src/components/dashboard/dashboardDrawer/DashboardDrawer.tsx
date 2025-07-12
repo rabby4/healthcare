@@ -39,6 +39,9 @@ const DashboardDrawer = ({ children }: { children: React.ReactNode }) => {
 				sx={{
 					width: { sm: `calc(100% - ${drawerWidth}px)` },
 					ml: { sm: `${drawerWidth}px` },
+					background: "#f4f7fe",
+					boxShadow: 0,
+					borderBottom: "1px solid lightgray",
 				}}
 			>
 				<Toolbar>
@@ -47,13 +50,23 @@ const DashboardDrawer = ({ children }: { children: React.ReactNode }) => {
 						aria-label="open drawer"
 						edge="start"
 						onClick={handleDrawerToggle}
-						sx={{ mr: 2, display: { sm: "none" } }}
+						sx={{ mr: 2, display: { sm: "none" }, color: "primary.main" }}
 					>
 						<MenuIcon />
 					</IconButton>
-					<Typography variant="h6" noWrap component="div">
-						Responsive drawer
-					</Typography>
+					<Box>
+						<Typography variant="body2" noWrap component="div" color="gray">
+							Hi, Rabby.
+						</Typography>
+						<Typography
+							variant="body2"
+							noWrap
+							component="div"
+							color="primary.main"
+						>
+							Welcome to, HealthCare!!
+						</Typography>
+					</Box>
 				</Toolbar>
 			</AppBar>
 			<Box
