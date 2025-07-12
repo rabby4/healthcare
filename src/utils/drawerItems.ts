@@ -49,12 +49,12 @@ export const drawerItems = (role: UserRole): DrawerItem[] => {
 				},
 				{
 					title: "Schedules",
-					path: `${role}/schedule`,
+					path: `${role}/schedules`,
 					icon: CalendarMonthIcon,
 				},
 				{
-					title: "Appointment",
-					path: `${role}/appointment`,
+					title: "Appointments",
+					path: `${role}/appointments`,
 					icon: EventAvailableIcon,
 				},
 				{
@@ -73,12 +73,12 @@ export const drawerItems = (role: UserRole): DrawerItem[] => {
 				},
 				{
 					title: "Schedules",
-					path: `${role}/schedule`,
+					path: `${role}/schedules`,
 					icon: CalendarMonthIcon,
 				},
 				{
-					title: "Appointment",
-					path: `${role}/appointment`,
+					title: "Appointments",
+					path: `${role}/appointments`,
 					icon: EventAvailableIcon,
 				}
 			)
@@ -86,7 +86,7 @@ export const drawerItems = (role: UserRole): DrawerItem[] => {
 		case USER_ROLE.PATIENT:
 			roleMenus.push(
 				{
-					title: "Appointment",
+					title: "Appointments",
 					path: `${role}/appointments`,
 					icon: CalendarMonthIcon,
 				},
