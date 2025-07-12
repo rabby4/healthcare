@@ -10,6 +10,7 @@ import CalendarMonthIcon from "@mui/icons-material/CalendarMonth"
 import ReviewsIcon from "@mui/icons-material/Reviews"
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong"
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney"
+import EventAvailableIcon from "@mui/icons-material/EventAvailable"
 
 export const drawerItems = (role: UserRole): DrawerItem[] => {
 	const roleMenus: DrawerItem[] = []
@@ -54,7 +55,7 @@ export const drawerItems = (role: UserRole): DrawerItem[] => {
 				{
 					title: "Appointment",
 					path: `${role}/appointment`,
-					icon: CalendarMonthIcon,
+					icon: EventAvailableIcon,
 				},
 				{
 					title: "Reviews",
@@ -78,7 +79,7 @@ export const drawerItems = (role: UserRole): DrawerItem[] => {
 				{
 					title: "Appointment",
 					path: `${role}/appointment`,
-					icon: CalendarMonthIcon,
+					icon: EventAvailableIcon,
 				}
 			)
 			break
