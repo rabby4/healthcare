@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-empty-object-type */
 import { USER_ROLE } from "@/constants/role"
 import { SvgIconTypeMap } from "@mui/material"
@@ -59,4 +60,20 @@ export interface DrawerItem {
 	parentPath?: string
 	icon?: OverridableComponent<SvgIconTypeMap<{}, "svg">> & { muiName: string }
 	child?: DrawerItem[]
+}
+
+export interface ResponseSuccessType {
+	data: any
+	meta?: IMeta
+}
+
+export interface IGenericErrorResponse {
+	statusCode: number
+	message: string
+	errorMessages: IGenericErrorMessage[]
+}
+
+export interface IGenericErrorMessage {
+	path: string | number
+	message: string
 }
