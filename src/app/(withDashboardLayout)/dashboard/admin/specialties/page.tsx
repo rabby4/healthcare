@@ -1,25 +1,39 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 import { Box, Button, IconButton, Stack, TextField } from "@mui/material"
 import SpecialistModal from "./components/SpecialistModal"
 import { useState } from "react"
-import { useGetAllSpecialtiesQuery } from "@/redux/api/specialtiesApi"
+import {
+	useDeleteSpecialtyMutation,
+	useGetAllSpecialtiesQuery,
+} from "@/redux/api/specialtiesApi"
 import { DataGrid, GridColDef } from "@mui/x-data-grid"
 import Image from "next/image"
 import { GridDeleteIcon } from "@mui/x-data-grid"
+import { toast } from "sonner"
 
 const SpecialtiesPage = () => {
 	const [isModalOpen, setIsModalOpen] = useState(false)
 	const { data, isLoading } = useGetAllSpecialtiesQuery({})
-	const handleDelete = (id: string) => {
-		console.log(id)
+	const [deleteSpecialty] = useDeleteSpecialtyMutation()
+
+	const handleDelete = async (id: string) => {
+		try {
+			const res = await deleteSpecialty(id).unwrap()
+			if (res.id) {
+				toast.success("Specialty deleted successfully!!!")
+			}
+		} catch (error: any) {
+			console.log(error)
+		}
 	}
 
 	const columns: GridColDef[] = [
-		{ field: "title", headerName: "Title", width: 300 },
+		{ field: "title", headerName: "Title", width: 400 },
 		{
 			field: "icon",
 			headerName: "Icon",
-			width: 300,
+			flex: 1,
 			renderCell: ({ row }) => {
 				return (
 					<Box
@@ -38,7 +52,9 @@ const SpecialtiesPage = () => {
 		{
 			field: "action",
 			headerName: "Actions",
-			width: 300,
+			flex: 1,
+			headerAlign: "left",
+			align: "center",
 			renderCell: ({ row }) => {
 				return (
 					<Box
