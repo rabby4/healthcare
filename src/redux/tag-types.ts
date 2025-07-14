@@ -9,5 +9,5 @@ export const tagTypesList = [
 	tagTypes.admin,
 	tagTypes.doctor,
 	tagTypes.patient,
-	tagTypes.specialties,
+	tagTypes.doctor,
 ]

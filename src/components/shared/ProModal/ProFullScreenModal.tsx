@@ -1,11 +1,10 @@
-"use client"
 import * as React from "react"
-import { styled, SxProps } from "@mui/material/styles"
-import Dialog from "@mui/material/Dialog"
-import DialogTitle from "@mui/material/DialogTitle"
-import DialogContent from "@mui/material/DialogContent"
 import IconButton from "@mui/material/IconButton"
 import CloseIcon from "@mui/icons-material/Close"
+import Slide from "@mui/material/Slide"
+import { TransitionProps } from "@mui/material/transitions"
+import { DialogContent, DialogTitle, SxProps } from "@mui/material"
+import { BootstrapDialog } from "./ProModal"
 
 type TModalProps = {
 	open: boolean
@@ -15,16 +14,16 @@ type TModalProps = {
 	sx?: SxProps
 }
 
-export const BootstrapDialog = styled(Dialog)(({ theme }) => ({
-	"& .MuiDialogContent-root": {
-		padding: theme.spacing(2),
+const Transition = React.forwardRef(function Transition(
+	props: TransitionProps & {
+		children: React.ReactElement<unknown>
 	},
-	"& .MuiDialogActions-root": {
-		padding: theme.spacing(1),
-	},
-}))
+	ref: React.Ref<unknown>
+) {
+	return <Slide direction="up" ref={ref} {...props} />
+})
 
-const ProModal = ({
+const ProFullScreenModal = ({
 	open = false,
 	setOpen,
 	title = "",
@@ -38,9 +37,13 @@ const ProModal = ({
 	return (
 		<React.Fragment>
 			<BootstrapDialog
+				fullScreen
+				open={open}
 				onClose={handleClose}
 				aria-labelledby="customized-dialog-title"
-				open={open}
+				slots={{
+					transition: Transition,
+				}}
 				sx={{ ...sx }}
 			>
 				<DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
@@ -49,19 +52,19 @@ const ProModal = ({
 				<IconButton
 					aria-label="close"
 					onClick={handleClose}
-					sx={(theme) => ({
+					sx={{
 						position: "absolute",
 						right: 8,
 						top: 8,
-						color: theme.palette.grey[500],
-					})}
+						color: (theme) => theme.palette.grey[500],
+					}}
 				>
 					<CloseIcon />
 				</IconButton>
-				<DialogContent dividers>{children}</DialogContent>
+				<DialogContent>{children}</DialogContent>
 			</BootstrapDialog>
 		</React.Fragment>
 	)
 }
 
-export default ProModal
+export default ProFullScreenModal
