@@ -1,4 +1,4 @@
-import { ISpecialties } from "@/types"
+import { ISpecialty } from "@/types"
 import { Box, Button, Container, Stack, Typography } from "@mui/material"
 import Image from "next/image"
 import React from "react"
@@ -30,7 +30,7 @@ const Specialist = async () => {
 					</Typography>
 				</Box>
 				<Stack direction={"row"} gap={4} mt={5}>
-					{specialties.slice(0, 6).map((specialty: ISpecialties) => (
+					{specialties.slice(0, 6).map((specialty: ISpecialty) => (
 						<Box
 							key={specialty.id}
 							sx={{

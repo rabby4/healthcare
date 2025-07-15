@@ -4,7 +4,7 @@ import { USER_ROLE } from "@/constants/role"
 import { SvgIconTypeMap } from "@mui/material"
 import { OverridableComponent } from "@mui/material/OverridableComponent"
 
-export interface ISpecialties {
+export interface ISpecialty {
 	id: string
 	title: string
 	icon: string
@@ -17,16 +17,24 @@ export interface IDoctor {
 	contactNumber: string
 	address: string
 	registrationNumber: string
-	experience: number
-	gender: string
-	appointmentFee: number
+	experience: number | undefined
+	gender: "MALE" | "FEMALE"
+	appointmentFee: number | undefined
 	qualification: string
 	currentWorkingPlace: string
 	designation: string
 	averageRating: number
-	isDeleted: boolean
-	createdAt: Date
-	updatedAt: Date
+	specialties?: ISpecialties[]
+}
+
+export interface ISpecialties {
+	specialtiesId: string
+	isDeleted?: null
+}
+
+export interface IDoctorFormData {
+	doctor: IDoctor
+	password: string
 }
 
 interface IPatientData {

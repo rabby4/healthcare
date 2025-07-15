@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { IDoctor, IMeta } from "@/types"
 import { tagTypes } from "../tag-types"
 import { baseApi } from "./baseApi"
 
@@ -13,10 +15,17 @@ const doctorApi = baseApi.injectEndpoints({
 			invalidatesTags: [tagTypes.doctor],
 		}),
 		getAllDoctors: build.query({
-			query: () => ({
+			query: (arg: Record<string, any>) => ({
 				url: "/doctor",
 				method: "GET",
+				params: arg,
 			}),
+			transformResponse: (response: IDoctor[], meta: IMeta) => {
+				return {
+					doctors: response,
+					meta,
+				}
+			},
 			providesTags: [tagTypes.doctor],
 		}),
 		deleteDoctor: build.mutation({
