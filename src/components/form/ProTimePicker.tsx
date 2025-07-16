@@ -1,11 +1,12 @@
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs"
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider"
-import { DesktopDatePicker } from "@mui/x-date-pickers/DesktopDatePicker"
-import dayjs from "dayjs"
 import { SxProps } from "@mui/material"
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs"
+import { TimePicker } from "@mui/x-date-pickers/TimePicker"
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider"
+import dayjs from "dayjs"
+import React from "react"
 import { Controller, useFormContext } from "react-hook-form"
 
-interface IDatePicker {
+interface ITimePicker {
 	name: string
 	size?: "small" | "medium"
 	label?: string
@@ -14,15 +15,16 @@ interface IDatePicker {
 	sx?: SxProps
 }
 
-const ProDatePicker = ({
+const ProTimePicker = ({
 	name,
 	size = "small",
 	label,
 	required,
 	fullWidth,
 	sx,
-}: IDatePicker) => {
-	const { control } = useFormContext()
+}: ITimePicker) => {
+	const { control, formState } = useFormContext()
+	const isError = formState.errors[name] !== undefined
 
 	return (
 		<Controller
@@ -32,12 +34,11 @@ const ProDatePicker = ({
 			render={({ field: { onChange, value, ...field } }) => {
 				return (
 					<LocalizationProvider dateAdapter={AdapterDayjs}>
-						<DesktopDatePicker
+						<TimePicker
 							{...field}
 							label={label}
 							timezone="system"
-							disablePast
-							onChange={(date) => onChange(date)}
+							onChange={(time) => onChange(time)}
 							value={value || Date.now()}
 							slotProps={{
 								textField: {
@@ -48,6 +49,10 @@ const ProDatePicker = ({
 									},
 									variant: "outlined",
 									fullWidth,
+									error: isError,
+									helperText: isError
+										? (formState.errors[name]?.message as string)
+										: "",
 								},
 							}}
 						/>
@@ -58,4 +63,4 @@ const ProDatePicker = ({
 	)
 }
 
-export default ProDatePicker
+export default ProTimePicker
