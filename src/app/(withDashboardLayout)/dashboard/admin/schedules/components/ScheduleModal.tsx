@@ -23,7 +23,6 @@ const ScheduleModal = ({ open, setOpen }: TProps) => {
 		values.endDate = formatDate(values.endDate)
 		values.startTime = formatTime(values.startTime)
 		values.endTime = formatTime(values.endTime)
-		// console.log(values)
 
 		try {
 			const res = await createSchedule(values)

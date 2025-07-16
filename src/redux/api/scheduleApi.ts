@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { IMeta } from "@/types"
 import { tagTypes } from "../tag-types"
 import { baseApi } from "./baseApi"
 
@@ -19,10 +18,10 @@ const scheduleApi = baseApi.injectEndpoints({
 				method: "GET",
 				params: arg,
 			}),
-			transformResponse: (response: [], meta: IMeta) => {
+			transformResponse: (response) => {
 				return {
-					schedule: response,
-					meta,
+					schedule: response?.data,
+					meta: response.meta,
 				}
 			},
 			providesTags: [tagTypes.schedule],
