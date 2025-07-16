@@ -29,7 +29,6 @@ const DoctorsPage = () => {
 	const [deleteDoctor] = useDeleteDoctorMutation()
 
 	const doctors = data?.doctors
-	const meta = data?.meta
 
 	const handleDelete = async (id: string) => {
 		try {

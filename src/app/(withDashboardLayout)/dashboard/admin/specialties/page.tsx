@@ -29,7 +29,7 @@ const SpecialtiesPage = () => {
 	}
 
 	const columns: GridColDef[] = [
-		{ field: "title", headerName: "Title", width: 400 },
+		{ field: "title", headerName: "Title", flex: 1 },
 		{
 			field: "icon",
 			headerName: "Icon",
