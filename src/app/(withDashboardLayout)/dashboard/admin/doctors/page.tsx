@@ -10,6 +10,8 @@ import {
 import { DataGrid, GridColDef, GridDeleteIcon } from "@mui/x-data-grid"
 import { useDebounced } from "@/redux/hooks"
 import { toast } from "sonner"
+import Link from "next/link"
+import BorderColorIcon from "@mui/icons-material/BorderColor"
 
 const DoctorsPage = () => {
 	const [isModalOpen, setIsModalOpen] = useState(false)
@@ -70,6 +72,11 @@ const DoctorsPage = () => {
 						>
 							<GridDeleteIcon />
 						</IconButton>
+						<Link href={`/dashboard/admin/doctors/edit/${row.id}`}>
+							<IconButton aria-label="delete">
+								<BorderColorIcon />
+							</IconButton>
+						</Link>
 					</Box>
 				)
 			},

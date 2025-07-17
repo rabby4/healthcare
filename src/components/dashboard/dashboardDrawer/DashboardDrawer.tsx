@@ -19,8 +19,7 @@ const drawerWidth = 240
 const DashboardDrawer = ({ children }: { children: React.ReactNode }) => {
 	const [mobileOpen, setMobileOpen] = React.useState(false)
 	const [isClosing, setIsClosing] = React.useState(false)
-	const { data, isLoading } = useGetSingleUsrQuery({})
-	console.log(data)
+	const { data } = useGetSingleUsrQuery({})
 
 	const handleDrawerClose = () => {
 		setIsClosing(true)
@@ -35,10 +34,6 @@ const DashboardDrawer = ({ children }: { children: React.ReactNode }) => {
 		if (!isClosing) {
 			setMobileOpen(!mobileOpen)
 		}
-	}
-
-	if (isLoading) {
-		return <p>loading...</p>
 	}
 
 	return (
@@ -72,7 +67,7 @@ const DashboardDrawer = ({ children }: { children: React.ReactNode }) => {
 					</IconButton>
 					<Box>
 						<Typography variant="body2" noWrap component="div" color="gray">
-							Hi, {data.name}.
+							Hi, {data?.name}.
 						</Typography>
 						<Typography
 							variant="body2"
@@ -91,11 +86,11 @@ const DashboardDrawer = ({ children }: { children: React.ReactNode }) => {
 						</Badge>
 						<Avatar
 							src={
-								data.profilePhoto
-									? data.profilePhoto
+								data?.profilePhoto
+									? data?.profilePhoto
 									: "https://res.cloudinary.com/dtw7xqrds/image/upload/v1747856982/isv4lb548qkzuvhtkeb3.jpg"
 							}
-							alt={data.name}
+							alt={data?.name}
 						/>
 						<AccountMenu />
 					</Stack>
