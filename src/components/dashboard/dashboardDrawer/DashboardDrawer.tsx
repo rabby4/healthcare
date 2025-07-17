@@ -9,12 +9,18 @@ import MenuIcon from "@mui/icons-material/Menu"
 import Toolbar from "@mui/material/Toolbar"
 import Typography from "@mui/material/Typography"
 import Sidebar from "../sidebar/Sidebar"
+import { useGetSingleUsrQuery } from "@/redux/api/userApi"
+import { Avatar, Badge, Stack } from "@mui/material"
+import NotificationsIcon from "@mui/icons-material/Notifications"
+import AccountMenu from "../accountMenu/AccountMenu"
 
 const drawerWidth = 240
 
 const DashboardDrawer = ({ children }: { children: React.ReactNode }) => {
 	const [mobileOpen, setMobileOpen] = React.useState(false)
 	const [isClosing, setIsClosing] = React.useState(false)
+	const { data, isLoading } = useGetSingleUsrQuery({})
+	console.log(data)
 
 	const handleDrawerClose = () => {
 		setIsClosing(true)
@@ -31,6 +37,10 @@ const DashboardDrawer = ({ children }: { children: React.ReactNode }) => {
 		}
 	}
 
+	if (isLoading) {
+		return <p>loading...</p>
+	}
+
 	return (
 		<Box sx={{ display: "flex" }}>
 			<CssBaseline />
@@ -44,7 +54,13 @@ const DashboardDrawer = ({ children }: { children: React.ReactNode }) => {
 					borderBottom: "1px solid lightgray",
 				}}
 			>
-				<Toolbar>
+				<Toolbar
+					sx={{
+						display: "flex",
+						justifyContent: "space-between",
+						alignItems: "center",
+					}}
+				>
 					<IconButton
 						color="inherit"
 						aria-label="open drawer"
@@ -56,7 +72,7 @@ const DashboardDrawer = ({ children }: { children: React.ReactNode }) => {
 					</IconButton>
 					<Box>
 						<Typography variant="body2" noWrap component="div" color="gray">
-							Hi, Rabby.
+							Hi, {data.name}.
 						</Typography>
 						<Typography
 							variant="body2"
@@ -67,6 +83,22 @@ const DashboardDrawer = ({ children }: { children: React.ReactNode }) => {
 							Welcome to, HealthCare!!
 						</Typography>
 					</Box>
+					<Stack direction={"row"} gap={3}>
+						<Badge badgeContent={1} color="primary">
+							<IconButton sx={{ background: "white" }}>
+								<NotificationsIcon color="action" />
+							</IconButton>
+						</Badge>
+						<Avatar
+							src={
+								data.profilePhoto
+									? data.profilePhoto
+									: "https://res.cloudinary.com/dtw7xqrds/image/upload/v1747856982/isv4lb548qkzuvhtkeb3.jpg"
+							}
+							alt={data.name}
+						/>
+						<AccountMenu />
+					</Stack>
 				</Toolbar>
 			</AppBar>
 			<Box

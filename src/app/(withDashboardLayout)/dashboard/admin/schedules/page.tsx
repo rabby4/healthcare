@@ -8,6 +8,7 @@ import { formatDate } from "@/utils/formatDate"
 import dayjs from "dayjs"
 import { DataGrid, GridColDef, GridDeleteIcon } from "@mui/x-data-grid"
 import BorderColorIcon from "@mui/icons-material/BorderColor"
+import { ISchedule } from "@/types"
 
 const SchedulesPage = () => {
 	const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
@@ -16,10 +17,8 @@ const SchedulesPage = () => {
 
 	const schedules = data?.schedule
 
-	console.log(schedules)
-
 	useEffect(() => {
-		const updateData = schedules?.map((schedule: any) => {
+		const updateData = schedules?.map((schedule: ISchedule) => {
 			return {
 				id: schedule?.id,
 				startDate: formatDate(schedule.startDateTime),
