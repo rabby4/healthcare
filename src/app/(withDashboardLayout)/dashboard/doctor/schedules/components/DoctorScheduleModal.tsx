@@ -44,6 +44,7 @@ const DoctorScheduleModal = ({ open, setOpen }: TProps) => {
 			const res = await createDoctorSchedule({
 				scheduleIds: selectedScheduleIds,
 			})
+			setOpen(false)
 			console.log(res)
 		} catch (error) {
 			console.error("Error fetching data:", error)
