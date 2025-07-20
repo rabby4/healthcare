@@ -59,8 +59,6 @@ const MultipleSelectFieldChip = ({
 		)
 	}
 
-	console.log(selectedScheduleIds)
-
 	return (
 		<div>
 			<FormControl sx={{ width: 300 }}>
@@ -95,7 +93,7 @@ const MultipleSelectFieldChip = ({
 					}}
 					MenuProps={MenuProps}
 				>
-					{schedules.map((schedule: any) => (
+					{schedules?.map((schedule: any) => (
 						<MenuItem
 							key={schedule?.id}
 							value={schedule?.id}
