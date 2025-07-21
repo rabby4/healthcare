@@ -12,6 +12,7 @@ import ReceiptLongIcon from "@mui/icons-material/ReceiptLong"
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney"
 import EventAvailableIcon from "@mui/icons-material/EventAvailable"
 import AccountBoxIcon from "@mui/icons-material/AccountBox"
+import SyncLockIcon from "@mui/icons-material/SyncLock"
 
 export const drawerItems = (role: UserRole): DrawerItem[] => {
 	const roleMenus: DrawerItem[] = []
@@ -21,6 +22,11 @@ export const drawerItems = (role: UserRole): DrawerItem[] => {
 			title: "Profile",
 			path: `${role}/profile`,
 			icon: AccountBoxIcon,
+		},
+		{
+			title: "Change Password",
+			path: `change-password`,
+			icon: SyncLockIcon,
 		},
 	]
 
