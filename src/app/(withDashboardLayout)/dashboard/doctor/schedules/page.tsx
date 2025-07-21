@@ -2,7 +2,7 @@
 "use client"
 import React, { useEffect, useState } from "react"
 import DoctorScheduleModal from "./components/DoctorScheduleModal"
-import { Box, Button, IconButton } from "@mui/material"
+import { Box, Button, IconButton, Pagination } from "@mui/material"
 import { DataGrid, GridColDef, GridDeleteIcon } from "@mui/x-data-grid"
 import { useGetAllDoctorSchedulesQuery } from "@/redux/api/doctorScheduleApi"
 import { formatDate } from "@/utils/formatDate"
@@ -11,16 +11,34 @@ import BorderColorIcon from "@mui/icons-material/BorderColor"
 
 const DoctorSchedulePage = () => {
 	const [isModalOpen, setIsModalOpen] = useState(false)
+
+	const query: Record<string, any> = {}
+
+	const [page, setPage] = useState(1)
+	const [limit, setLimit] = useState(4)
+
+	query["page"] = page
+	query["limit"] = limit
+
 	const [allSchedule, setAllSchedule] = useState<any>([])
-	const { data, isLoading } = useGetAllDoctorSchedulesQuery({})
+	const { data, isLoading } = useGetAllDoctorSchedulesQuery({ ...query })
 	const schedules = data?.doctorSchedules
-	console.log(schedules)
+	const meta = data?.meta
+
+	let pageCount: number
+
+	if (meta?.total) {
+		pageCount = Math.ceil(meta?.total / limit)
+	}
+
+	const handleChange = (event: React.ChangeEvent<unknown>, value: number) => {
+		setPage(value)
+	}
 
 	useEffect(() => {
-		const updateData = schedules?.map((schedule: any, index: number) => {
+		const updateData = schedules?.map((schedule: any) => {
 			return {
-				sl: index + 1,
-				id: index + 1,
+				id: schedule?.scheduleId,
 				startDate: formatDate(schedule?.schedule?.startDateTime),
 				endDate: formatDate(schedule?.schedule?.endDateTime),
 				startTime: dayjs(schedule?.schedule?.startDateTime).format("hh:mm a"),
@@ -31,7 +49,6 @@ const DoctorSchedulePage = () => {
 	}, [schedules])
 
 	const columns: GridColDef[] = [
-		{ field: "sl", headerName: "SL" },
 		{ field: "startDate", headerName: "Start Date", flex: 1 },
 		{ field: "endDate", headerName: "End Date", flex: 1 },
 		{ field: "startTime", headerName: "Start Time", flex: 1 },
@@ -66,7 +83,32 @@ const DoctorSchedulePage = () => {
 			<Box>
 				{!isLoading ? (
 					<Box my={2}>
-						<DataGrid rows={allSchedule ?? []} columns={columns} />
+						<DataGrid
+							rows={allSchedule ?? []}
+							columns={columns}
+							slots={{
+								footer: () => {
+									return (
+										<Box
+											sx={{
+												mb: 2,
+												borderTop: "1px solid #ccc",
+												pt: 2,
+												display: "flex",
+												justifyContent: "flex-end",
+											}}
+										>
+											<Pagination
+												count={pageCount}
+												page={page}
+												onChange={handleChange}
+												color="primary"
+											/>
+										</Box>
+									)
+								},
+							}}
+						/>
 					</Box>
 				) : (
 					<h1>Loading.....</h1>

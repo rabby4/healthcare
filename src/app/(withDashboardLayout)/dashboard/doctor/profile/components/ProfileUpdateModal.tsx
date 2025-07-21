@@ -193,6 +193,7 @@ const ProfileUpdateModal = ({ open, setOpen, id }: TProps) => {
 						/>
 					</Grid>
 					<Grid size={{ xs: 12, sm: 12, md: 4 }}>
+						{/* Need to work for this */}
 						<MultipleSelectChip
 							allSpecialties={allSpecialties}
 							selectedIds={selectedSpecialtiesIds}
