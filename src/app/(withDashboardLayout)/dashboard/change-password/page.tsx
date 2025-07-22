@@ -24,7 +24,6 @@ const ChangePassword = () => {
 	const onSubmit = async (values: FieldValues) => {
 		try {
 			const res = await changePassword(values)
-			console.log(res)
 			if ("data" in res && res.data.status === 200) {
 				logoutUser(router)
 				toast.success("Password Changed Successfully")

@@ -8,7 +8,6 @@ import { storeUserInfo } from "@/services/auth.services"
 import { Box, Button, Container, Grid, Stack, Typography } from "@mui/material"
 import Image from "next/image"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
 import React, { useState } from "react"
 import { FieldValues } from "react-hook-form"
 import { toast } from "sonner"
@@ -21,7 +20,6 @@ export const validationSchema = z.object({
 })
 
 const LoginPage = () => {
-	const router = useRouter()
 	const [error, setError] = useState()
 
 	const handleLogin = async (values: FieldValues) => {
@@ -30,7 +28,6 @@ const LoginPage = () => {
 			if (res.data.accessToken) {
 				toast.success(res.message)
 				storeUserInfo({ accessToken: res.data.accessToken })
-				// router.push("/dashboard")
 			} else {
 				setError(res.message)
 			}
@@ -98,8 +95,12 @@ const LoginPage = () => {
 									/>
 								</Grid>
 							</Grid>
-							<Typography component="p" textAlign={"right"}>
-								<Link href={"/"}>Forget Password?</Link>
+							<Typography
+								component="p"
+								textAlign={"right"}
+								sx={{ textDecoration: "underline" }}
+							>
+								<Link href={"/forgot-password"}>Forget Password?</Link>
 							</Typography>
 							<Button type="submit" fullWidth sx={{ my: 2 }}>
 								Login
