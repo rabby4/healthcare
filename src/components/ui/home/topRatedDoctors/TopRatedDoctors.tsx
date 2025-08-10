@@ -38,29 +38,40 @@ const TopRatedDoctors = async () => {
 			</Box>
 			<Container sx={{ margin: "30px auto" }}>
 				<Grid container spacing={2}>
-					{doctors.map((doctor: IDoctor) => (
-						<Grid key={doctor.id} size={4}>
+					{doctors?.map((doctor: IDoctor) => (
+						<Grid key={doctor?.id} size={4}>
 							<Card>
-								<Box>
+								<Box
+									sx={{
+										width: "100%",
+										height: 300,
+										"& img": {
+											width: "100%",
+											height: "100%",
+											objectFit: "cover",
+											overflow: "hidden",
+										},
+									}}
+								>
 									<Image
-										src={doctor.profilePhoto}
+										src={doctor?.profilePhoto}
 										width={500}
 										height={500}
-										alt={doctor.name}
+										alt={doctor?.name}
 									/>
 								</Box>
 								<CardContent>
 									<Typography gutterBottom variant="h5" component="div">
-										{doctor.name}
+										{doctor?.name}
 									</Typography>
 									<Typography variant="body2" sx={{ color: "text.secondary" }}>
-										{doctor.qualification}, {doctor.designation}
+										{doctor?.qualification}, {doctor?.designation}
 									</Typography>
 									<Typography
 										variant="body2"
 										sx={{ color: "text.secondary", mt: 1 }}
 									>
-										<LocationOnIcon /> {doctor.address}
+										<LocationOnIcon /> {doctor?.address}
 									</Typography>
 								</CardContent>
 								<CardActions
@@ -76,7 +87,7 @@ const TopRatedDoctors = async () => {
 					))}
 				</Grid>
 				<Box sx={{ margin: "20px", textAlign: "center" }}>
-					<Button variant="outlined" sx={{ marginTop: 3 }}>
+					<Button variant="outlined" sx={{ marginTop: 3 }} href="/doctors">
 						View All
 					</Button>
 				</Box>

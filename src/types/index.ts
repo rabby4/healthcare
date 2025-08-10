@@ -11,25 +11,34 @@ export interface ISpecialty {
 }
 export interface IDoctor {
 	id: string
-	name: string
 	email: string
+	name: string
 	profilePhoto: string
 	contactNumber: string
 	address: string
 	registrationNumber: string
-	experience: number | undefined
-	gender: "MALE" | "FEMALE"
-	appointmentFee: number | undefined
+	experience: number
+	gender: "MALE" | "FEMALE" | "OTHER"
+	appointmentFee: number
 	qualification: string
 	currentWorkingPlace: string
 	designation: string
+	isDeleted: boolean
+	createdAt: string
+	updatedAt: string
 	averageRating: number
-	specialties?: ISpecialties[]
+	review: any[] // You may want to specify the structure of the review object if known
+	doctorSpecialties: DoctorSpecialty[]
 }
 
 export interface ISpecialties {
 	specialtiesId: string
 	isDeleted?: null
+}
+export interface DoctorSpecialty {
+	specialtiesId: string
+	doctorId: string
+	specialties: any // You may want to specify the structure of the specialties object if known
 }
 
 export interface IDoctorFormData {
