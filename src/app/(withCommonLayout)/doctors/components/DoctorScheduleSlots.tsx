@@ -1,22 +1,25 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 import { getTimeIn12HourFormat } from "@/app/(withDashboardLayout)/dashboard/doctor/schedules/components/MultipleSelectFieldChip"
+import { useCreateAppointmentMutation } from "@/redux/api/appointmentApi"
 import { useGetAllDoctorSchedulesQuery } from "@/redux/api/doctorScheduleApi"
+import { useInitialPaymentMutation } from "@/redux/api/paymentApi"
 import { IDoctorSchedule } from "@/types"
 import { formatDate } from "@/utils/formatDate"
-
 import { Box, Button, Stack, Typography } from "@mui/material"
 import dayjs from "dayjs"
 import utc from "dayjs/plugin/utc"
+import { useRouter } from "next/navigation"
 import { useState } from "react"
 dayjs.extend(utc)
 
 const DoctorScheduleSlots = ({ id }: { id: string }) => {
 	const [scheduleId, setScheduleId] = useState("")
+	const router = useRouter()
 
 	const query: Record<string, any> = {}
 
-	query["doctorId"] = id
+	query["id"] = id
 
 	query["startDateTime"] = dayjs(new Date())
 		.utc()
@@ -36,11 +39,7 @@ const DoctorScheduleSlots = ({ id }: { id: string }) => {
 
 	const { data, isLoading } = useGetAllDoctorSchedulesQuery({ ...query })
 
-	console.log(data)
-
 	const doctorSchedules = data?.doctorSchedules
-
-	console.log(doctorSchedules)
 
 	const currentDate = new Date()
 	const today = currentDate.toLocaleDateString("en-US", { weekday: "long" })
@@ -48,9 +47,29 @@ const DoctorScheduleSlots = ({ id }: { id: string }) => {
 	const availableSlots = doctorSchedules?.filter(
 		(doctor: IDoctorSchedule) => !doctor.isBooked
 	)
-	console.log(availableSlots)
 
-	const handleBookAppointment = async () => {}
+	const [createAppointment] = useCreateAppointmentMutation()
+	const [initialPayment] = useInitialPaymentMutation()
+
+	const handleBookAppointment = async () => {
+		try {
+			if (id && scheduleId) {
+				const res = await createAppointment({
+					doctorId: id,
+					scheduleId,
+				}).unwrap()
+				console.log(res)
+				if (res.id) {
+					const response = await initialPayment(res.id).unwrap()
+					if (response.paymentUrl) {
+						router.push(response.paymentUrl)
+					}
+				}
+			}
+		} catch (error) {
+			console.log(error)
+		}
+	}
 
 	return (
 		<Box mb={5}>

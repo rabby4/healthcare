@@ -9,6 +9,7 @@ export enum tagTypes {
 	user = "user",
 	prescription = "prescription",
 	review = "review",
+	payment = "payment",
 }
 
 export const tagTypesList = [
