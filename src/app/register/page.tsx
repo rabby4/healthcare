@@ -84,7 +84,7 @@ const RegisterPage = () => {
 							<Image src={assets.svgs.logo} width={50} height={50} alt="logo" />
 						</Box>
 						<Box>
-							<Typography variant="h5" fontWeight={700}>
+							<Typography variant="h5" sx={{ fontWeight: 700 }}>
 								Patient Register
 							</Typography>
 						</Box>
@@ -95,7 +95,7 @@ const RegisterPage = () => {
 							resolver={zodResolver(validationSchema)}
 							defaultValues={defaultValues}
 						>
-							<Grid container spacing={3} my={2}>
+							<Grid container spacing={3} sx={{ my: 2 }}>
 								<Grid size={{ md: 12 }}>
 									<ProInput label="Name" fullWidth name="patient.name" />
 								</Grid>

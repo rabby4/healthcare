@@ -7,7 +7,11 @@ import type { NextRequest } from "next/server"
 type Role = keyof typeof roleBasedPrivateRoutes
 
 const AuthRoutes = ["/login", "/register"]
-const commonPrivateRoutes = ["/dashboard", "/dashboard/change-password"]
+const commonPrivateRoutes = [
+	"/dashboard",
+	"/dashboard/change-password",
+	"/doctors",
+]
 const roleBasedPrivateRoutes = {
 	PATIENT: [/^\/dashboard\/patient/],
 	DOCTOR: [/^\/dashboard\/doctor/],
@@ -15,11 +19,13 @@ const roleBasedPrivateRoutes = {
 	SUPER_ADMIN: [/^\/dashboard\/super-admin/],
 }
 
-// This function can be marked `async` if using `await` inside
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
 	const { pathname } = request.nextUrl
+
 	const cookie = await cookies()
 	const accessToken = cookie.get("accessToken")?.value
+
+	// const accessToken = cookies().get('accessToken')?.value;
 
 	if (!accessToken) {
 		if (AuthRoutes.includes(pathname)) {
@@ -29,28 +35,24 @@ export async function middleware(request: NextRequest) {
 		}
 	}
 
-	if (accessToken && commonPrivateRoutes.includes(pathname)) {
+	if (
+		accessToken &&
+		(commonPrivateRoutes.includes(pathname) ||
+			commonPrivateRoutes.some((route) => pathname.startsWith(route)))
+	) {
 		return NextResponse.next()
 	}
 
-	let decoded = null
+	let decodedData = null
+
 	if (accessToken) {
-		decoded = jwtDecode(accessToken) as any
+		decodedData = jwtDecode(accessToken) as any
 	}
 
-	const role = decoded?.role
+	const role = decodedData?.role
 
-	// if (role === "ADMIN" && pathname.startsWith("/dashboard/admin")) {
-	// 	return NextResponse.next()
-	// }
-	// if (role === "SUPER_ADMIN" && pathname.startsWith("/dashboard/super_admin")) {
-	// 	return NextResponse.next()
-	// }
-	// if (role === "DOCTOR" && pathname.startsWith("/dashboard/doctor")) {
-	// 	return NextResponse.next()
-	// }
-	// if (role === "PATIENT" && pathname.startsWith("/dashboard/patient")) {
-	// 	return NextResponse.next()
+	// if (role === 'ADMIN' && pathname.startsWith('/dashboard/admin')) {
+	//    return NextResponse.next();
 	// }
 
 	if (role && roleBasedPrivateRoutes[role as Role]) {
@@ -64,5 +66,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-	matcher: ["/login", "/register", "/dashboard/:page*"],
+	matcher: ["/login", "/register", "/dashboard/:page*", "/doctors/:page*"],
 }

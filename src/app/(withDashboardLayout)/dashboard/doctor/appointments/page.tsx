@@ -79,7 +79,7 @@ const PatientAppointmentsPage = () => {
 	return (
 		<Box>
 			{!isLoading ? (
-				<Box my={2}>
+				<Box sx={{ my: 2 }}>
 					<DataGrid
 						rows={appointments ?? []}
 						columns={columns}

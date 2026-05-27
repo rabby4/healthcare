@@ -8,7 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import z from "zod"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useResetPasswordMutation } from "@/redux/api/authApi"
-import { useEffect } from "react"
+import { Suspense, useEffect } from "react"
 import { authKey } from "@/constants/authKey"
 import { FieldValues } from "react-hook-form"
 import { toast } from "sonner"
@@ -18,7 +18,7 @@ const validationSchema = z.object({
 	password: z.string().min(6, "Must be at least 6 characters long"),
 })
 
-const ResetPassword = () => {
+const ResetPasswordContent = () => {
 	const searchParams = useSearchParams()
 	const id = searchParams.get("id")
 	const token = searchParams.get("token")
@@ -65,7 +65,7 @@ const ResetPassword = () => {
 				mt: { xs: 2, md: 10 },
 			}}
 		>
-			<Stack alignItems="center" justifyContent="center">
+			<Stack sx={{ alignItems: "center", justifyContent: "center" }}>
 				<Box
 					sx={{
 						"& svg": {
@@ -76,7 +76,7 @@ const ResetPassword = () => {
 				>
 					<LockResetIcon sx={{ color: "primary.main" }} />
 				</Box>
-				<Typography variant="h5" fontWeight={600} sx={{ mb: 2 }}>
+				<Typography variant="h5" sx={{ fontWeight: 600, mb: 2 }}>
 					Reset password
 				</Typography>
 			</Stack>
@@ -104,5 +104,11 @@ const ResetPassword = () => {
 		</Box>
 	)
 }
+
+const ResetPassword = () => (
+	<Suspense>
+		<ResetPasswordContent />
+	</Suspense>
+)
 
 export default ResetPassword

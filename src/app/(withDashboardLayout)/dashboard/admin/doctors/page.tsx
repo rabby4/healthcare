@@ -87,8 +87,7 @@ const DoctorsPage = () => {
 		<Box>
 			<Stack
 				direction={"row"}
-				justifyContent={"space-between"}
-				alignItems={"center"}
+				sx={{ justifyContent: "space-between", alignItems: "center" }}
 			>
 				<Button onClick={() => setIsModalOpen(true)}>Create New Doctor</Button>
 				<DoctorModal open={isModalOpen} setOpen={setIsModalOpen} />

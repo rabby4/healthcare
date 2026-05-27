@@ -60,14 +60,13 @@ const SchedulesPage = () => {
 		<Box>
 			<Stack
 				direction={"row"}
-				justifyContent={"space-between"}
-				alignItems={"center"}
+				sx={{ justifyContent: "space-between", alignItems: "center" }}
 			>
 				<Button onClick={() => setIsModalOpen(true)}>Create Specialty</Button>
 				<ScheduleModal open={isModalOpen} setOpen={setIsModalOpen} />
 			</Stack>
 			{!isLoading ? (
-				<Box my={2}>
+				<Box sx={{ my: 2 }}>
 					<DataGrid rows={allSchedule ?? []} columns={columns} />
 				</Box>
 			) : (

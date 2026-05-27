@@ -72,16 +72,19 @@ const DoctorScheduleSlots = ({ id }: { id: string }) => {
 	}
 
 	return (
-		<Box mb={5}>
+		<Box sx={{ mb: 5 }}>
 			<Box sx={{ bgcolor: "white", p: 3, mt: 1 }}>
-				<Typography variant="h4" mb={3} color="primary.main">
+				<Typography variant="h4" sx={{ mb: 3, color: "primary.main" }}>
 					Availability
 				</Typography>
-				<Typography variant="h6" fontSize={16}>
+				<Typography variant="h6" sx={{ fontSize: 16 }}>
 					<b>Today: {formatDate(currentDate.toISOString()) + " " + today}</b>
 				</Typography>
 				<Box sx={{ borderBottom: "2px dashed #d0d0d0", mt: 2, mb: 3 }} />
-				<Stack direction="row" alignItems="center" flexWrap="wrap" gap={2}>
+				<Stack
+					direction="row"
+					sx={{ alignItems: "center", flexWrap: "wrap", gap: 2 }}
+				>
 					{availableSlots?.length ? (
 						isLoading ? (
 							"Loading..."

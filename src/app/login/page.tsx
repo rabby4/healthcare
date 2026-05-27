@@ -56,7 +56,7 @@ const LoginPage = () => {
 							<Image src={assets.svgs.logo} width={50} height={50} alt="logo" />
 						</Box>
 						<Box>
-							<Typography variant="h5" fontWeight={700}>
+							<Typography variant="h5" sx={{ fontWeight: 700 }}>
 								Login Health Care
 							</Typography>
 						</Box>
@@ -82,7 +82,7 @@ const LoginPage = () => {
 							resolver={zodResolver(validationSchema)}
 							defaultValues={{ email: "", password: "" }}
 						>
-							<Grid container spacing={3} my={2}>
+							<Grid container spacing={3} sx={{ my: 2 }}>
 								<Grid size={{ md: 6 }}>
 									<ProInput name="email" label="Email" type="email" fullWidth />
 								</Grid>
@@ -97,8 +97,7 @@ const LoginPage = () => {
 							</Grid>
 							<Typography
 								component="p"
-								textAlign={"right"}
-								sx={{ textDecoration: "underline" }}
+								sx={{ textAlign: "right", textDecoration: "underline" }}
 							>
 								<Link href={"/forgot-password"}>Forget Password?</Link>
 							</Typography>

@@ -36,18 +36,17 @@ const WhyUs = () => {
 			<Box>
 				<Box sx={{ textAlign: "center" }}>
 					<Typography
-						color="primary"
 						variant="h6"
 						component={"h1"}
-						fontWeight={700}
+						sx={{ color: "primary.main", fontWeight: 700 }}
 					>
 						Why Us
 					</Typography>
-					<Typography variant="h4" component="h1" fontWeight={700}>
+					<Typography variant="h4" component="h1" sx={{ fontWeight: 700 }}>
 						Why Choose Us
 					</Typography>
 				</Box>
-				<Grid spacing={2} container my={5}>
+				<Grid spacing={2} container sx={{ my: 5 }}>
 					<Grid size={{ md: 6 }}>
 						{/* box number 1 */}
 						<Box
@@ -70,10 +69,10 @@ const WhyUs = () => {
 								<Image src={servicesData[0].imageSrc} width={50} alt="award" />
 							</Box>
 							<Box>
-								<Typography variant="h6" component="h6" fontWeight={600}>
+								<Typography variant="h6" component="h6" sx={{ fontWeight: 600 }}>
 									{servicesData[0].title}
 								</Typography>
-								<Typography variant="body2" color="primary.body1">
+								<Typography variant="body2" sx={{ color: "primary.body1" }}>
 									{servicesData[0].description}
 								</Typography>
 							</Box>
@@ -100,10 +99,10 @@ const WhyUs = () => {
 								<Image src={servicesData[1].imageSrc} width={50} alt="award" />
 							</Box>
 							<Box>
-								<Typography variant="h6" component="h6" fontWeight={600}>
+								<Typography variant="h6" component="h6" sx={{ fontWeight: 600 }}>
 									{servicesData[1].title}
 								</Typography>
-								<Typography variant="body2" color="primary.body1">
+								<Typography variant="body2" sx={{ color: "primary.body1" }}>
 									{servicesData[1].description}
 								</Typography>
 							</Box>
@@ -129,10 +128,10 @@ const WhyUs = () => {
 								<Image src={servicesData[2].imageSrc} width={50} alt="award" />
 							</Box>
 							<Box>
-								<Typography variant="h6" component="h6" fontWeight={600}>
+								<Typography variant="h6" component="h6" sx={{ fontWeight: 600 }}>
 									{servicesData[2].title}
 								</Typography>
-								<Typography variant="body2" color="primary.body1">
+								<Typography variant="body2" sx={{ color: "primary.body1" }}>
 									{servicesData[2].description}
 								</Typography>
 							</Box>
@@ -159,10 +158,10 @@ const WhyUs = () => {
 								<Image src={servicesData[3].imageSrc} width={50} alt="award" />
 							</Box>
 							<Box>
-								<Typography variant="h6" component="h6" fontWeight={600}>
+								<Typography variant="h6" component="h6" sx={{ fontWeight: 600 }}>
 									{servicesData[3].title}
 								</Typography>
-								<Typography variant="body2" color="primary.body1">
+								<Typography variant="body2" sx={{ color: "primary.body1" }}>
 									{servicesData[3].description}
 								</Typography>
 							</Box>

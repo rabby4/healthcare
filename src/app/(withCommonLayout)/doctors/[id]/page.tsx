@@ -34,14 +34,12 @@ const DoctorsProfilePage = async ({ params }: PropTypes) => {
 
 	return (
 		<Container>
-			<Box my={5}>
-				<Typography variant="h4" fontWeight={700} textAlign="center">
+			<Box sx={{ my: 5 }}>
+				<Typography variant="h4" sx={{ fontWeight: 700, textAlign: "center" }}>
 					Doctor&apos;s Profile Details
 				</Typography>
 				<Typography
-					textAlign="center"
-					mt={2}
-					sx={{ width: "70%", margin: "10px auto" }}
+					sx={{ textAlign: "center", mt: 2, width: "70%", margin: "10px auto" }}
 					variant="h6"
 				>
 					Compassionate and dedicated doctor committed to delivering
@@ -54,7 +52,7 @@ const DoctorsProfilePage = async ({ params }: PropTypes) => {
 			<Box>
 				<Box sx={{ my: 10, p: 3, bgcolor: "#f8f8f8" }}>
 					<Stack sx={{ bgcolor: "white", p: 3 }}>
-						<Stack direction="row" gap={3}>
+						<Stack direction="row" sx={{ gap: 3 }}>
 							<Box sx={{ width: 281, height: 281, bgcolor: "#808080" }}>
 								<Image
 									src={doctor?.profilePhoto}
@@ -66,15 +64,18 @@ const DoctorsProfilePage = async ({ params }: PropTypes) => {
 									}}
 								/>
 							</Box>
-							<Stack flex={1}>
+							<Stack sx={{ flex: 1 }}>
 								<Box>
-									<Typography variant="h6" fontWeight={600}>
+									<Typography variant="h6" sx={{ fontWeight: 600 }}>
 										{doctor?.name}
 									</Typography>
 									<Typography sx={{ my: "2px", color: "secondary.main" }}>
 										{doctor?.designation}
 									</Typography>
-									<Stack direction="row" alignItems="center" gap={2} mt={1}>
+									<Stack
+										direction="row"
+										sx={{ alignItems: "center", gap: 2, mt: 1 }}
+									>
 										<Typography
 											noWrap
 											sx={{
@@ -105,9 +106,9 @@ const DoctorsProfilePage = async ({ params }: PropTypes) => {
 								<Box>
 									<Stack direction="row">
 										<Typography
-											fontWeight={"bold"}
 											// fontSize={20}
 											sx={{
+												fontWeight: "bold",
 												color: "#141414",
 											}}
 										>
@@ -129,9 +130,9 @@ const DoctorsProfilePage = async ({ params }: PropTypes) => {
 						</Stack>
 						<Stack
 							direction={"row"}
-							gap={3}
-							justifyContent={"space-between"}
 							sx={{
+								gap: 3,
+								justifyContent: "space-between",
 								my: 4,
 							}}
 						>

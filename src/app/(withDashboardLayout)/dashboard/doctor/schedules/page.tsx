@@ -82,7 +82,7 @@ const DoctorSchedulePage = () => {
 			<DoctorScheduleModal open={isModalOpen} setOpen={setIsModalOpen} />
 			<Box>
 				{!isLoading ? (
-					<Box my={2}>
+					<Box sx={{ my: 2 }}>
 						<DataGrid
 							rows={allSchedule ?? []}
 							columns={columns}

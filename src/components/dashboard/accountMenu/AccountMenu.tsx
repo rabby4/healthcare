@@ -11,6 +11,7 @@ import Tooltip from "@mui/material/Tooltip"
 import Logout from "@mui/icons-material/Logout"
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown"
 import { useRouter } from "next/navigation"
+import { logoutUser } from "@/services/actions/logoutUser"
 
 export default function AccountMenu() {
 	const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
@@ -27,8 +28,9 @@ export default function AccountMenu() {
 
 	const handleLogout = () => {
 		setAnchorEl(null)
-		localStorage.removeItem("accessToken")
-		router.push("/login")
+		logoutUser(router)
+		// localStorage.removeItem("accessToken")
+		// router.push("/login")
 	}
 
 	return (
@@ -36,7 +38,7 @@ export default function AccountMenu() {
 			<Box sx={{ display: "flex", alignItems: "center", textAlign: "center" }}>
 				<Tooltip
 					title="Account settings"
-					componentsProps={{
+					slotProps={{
 						tooltip: {
 							sx: {
 								bgcolor: "#cdd1da5c",
@@ -68,29 +70,31 @@ export default function AccountMenu() {
 				open={open}
 				onClose={handleClose}
 				onClick={handleClose}
-				PaperProps={{
-					sx: {
-						elevation: 0,
-						overflow: "visible",
-						filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
-						mt: 1.5,
-						"& .MuiAvatar-root": {
-							width: 32,
-							height: 32,
-							ml: -0.5,
-							mr: 1,
-						},
-						"&:before": {
-							content: '""',
-							display: "block",
-							position: "absolute",
-							top: 0,
-							right: 14,
-							width: 10,
-							height: 10,
-							bgcolor: "background.paper",
-							transform: "translateY(-50%) rotate(45deg)",
-							zIndex: 0,
+				slotProps={{
+					paper: {
+						sx: {
+							elevation: 0,
+							overflow: "visible",
+							filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
+							mt: 1.5,
+							"& .MuiAvatar-root": {
+								width: 32,
+								height: 32,
+								ml: -0.5,
+								mr: 1,
+							},
+							"&:before": {
+								content: '""',
+								display: "block",
+								position: "absolute",
+								top: 0,
+								right: 14,
+								width: 10,
+								height: 10,
+								bgcolor: "background.paper",
+								transform: "translateY(-50%) rotate(45deg)",
+								zIndex: 0,
+							},
 						},
 					},
 				}}

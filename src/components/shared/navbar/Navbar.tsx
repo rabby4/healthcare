@@ -17,24 +17,25 @@ const Navbar = () => {
 	return (
 		<Container>
 			<Stack
-				py={2}
 				direction={"row"}
-				justifyContent={"space-between"}
-				alignItems={"center"}
+				sx={{
+					py: 2,
+					justifyContent: "space-between",
+					alignItems: "center",
+				}}
 			>
 				<Typography
 					variant="h4"
 					component={Link}
-					fontWeight={700}
-					textTransform={"uppercase"}
 					href="/"
+					sx={{ fontWeight: 700, textTransform: "uppercase" }}
 				>
-					<Box component={"span"} color={"primary.main"}>
+					<Box component={"span"} sx={{ color: "primary.main" }}>
 						H
 					</Box>
 					ealth Care
 				</Typography>
-				<Stack direction={"row"} spacing={3} justifyContent={"space-between"}>
+				<Stack direction={"row"} spacing={3} sx={{ justifyContent: "space-between" }}>
 					<Typography component={Link} href="/consultation">
 						Consultation
 					</Typography>

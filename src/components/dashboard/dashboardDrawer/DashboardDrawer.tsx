@@ -66,19 +66,19 @@ const DashboardDrawer = ({ children }: { children: React.ReactNode }) => {
 						<MenuIcon />
 					</IconButton>
 					<Box>
-						<Typography variant="body2" noWrap component="div" color="gray">
+						<Typography variant="body2" noWrap component="div" sx={{ color: "gray" }}>
 							Hi, {data?.name}.
 						</Typography>
 						<Typography
 							variant="body2"
 							noWrap
 							component="div"
-							color="primary.main"
+							sx={{ color: "primary.main" }}
 						>
 							Welcome to, HealthCare!!
 						</Typography>
 					</Box>
-					<Stack direction={"row"} gap={3}>
+					<Stack direction={"row"} sx={{ gap: 3 }}>
 						<Badge badgeContent={1} color="primary">
 							<IconButton sx={{ background: "white" }}>
 								<NotificationsIcon color="action" />

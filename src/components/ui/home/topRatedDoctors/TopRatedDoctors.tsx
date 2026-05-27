@@ -26,13 +26,13 @@ const TopRatedDoctors = async () => {
 			}}
 		>
 			<Box sx={{ textAlign: "center" }}>
-				<Typography variant="h4" component={"h1"} fontWeight={700}>
+				<Typography variant="h4" component={"h1"} sx={{ fontWeight: 700 }}>
 					Our Top Rated Doctors
 				</Typography>
-				<Typography component={"p"} fontSize={18} sx={{ mt: 2 }}>
+				<Typography component={"p"} sx={{ fontSize: 18, mt: 2 }}>
 					Access to expert physicians and surgeons, advanced technologies
 				</Typography>
-				<Typography component={"p"} fontSize={18}>
+				<Typography component={"p"} sx={{ fontSize: 18 }}>
 					and top-quality surgery facilities right here
 				</Typography>
 			</Box>

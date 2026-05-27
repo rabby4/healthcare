@@ -1,12 +1,14 @@
 "use client"
 import { useSearchParams } from "next/navigation"
-import { useState } from "react"
-import AgoraUIKit from "agora-react-uikit"
+import { Suspense, useState } from "react"
+import dynamic from "next/dynamic"
+
+const AgoraUIKit = dynamic(() => import("agora-react-uikit"), { ssr: false })
 import { Button, Stack } from "@mui/material"
 import VideocamIcon from "@mui/icons-material/Videocam"
 import Image from "next/image"
 
-const VideoCalling = () => {
+const VideoCallingContent = () => {
 	const videoCallingId = useSearchParams().get("videoCallingId")
 
 	const [startVideoCall, setStartVideoCall] = useState(false)
@@ -31,11 +33,11 @@ const VideoCalling = () => {
 				maxWidth: 500,
 				mx: "auto",
 				mt: { xs: 2, md: 10 },
+				alignItems: "center",
+				justifyContent: "center",
+				gap: 2,
 			}}
 			direction="column"
-			alignItems="center"
-			justifyContent="center"
-			gap={2}
 		>
 			<Button
 				onClick={() => setStartVideoCall(true)}
@@ -53,5 +55,11 @@ const VideoCalling = () => {
 		</Stack>
 	)
 }
+
+const VideoCalling = () => (
+	<Suspense>
+		<VideoCallingContent />
+	</Suspense>
+)
 
 export default VideoCalling

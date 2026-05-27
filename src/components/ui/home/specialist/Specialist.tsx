@@ -1,6 +1,7 @@
 import { ISpecialty } from "@/types"
 import { Box, Button, Container, Stack, Typography } from "@mui/material"
 import Image from "next/image"
+import Link from "next/link"
 import React from "react"
 
 const Specialist = async () => {
@@ -22,49 +23,56 @@ const Specialist = async () => {
 						textAlign: "left",
 					}}
 				>
-					<Typography variant="h4" fontWeight={700}>
+					<Typography variant="h4" sx={{ fontWeight: 700 }}>
 						Explore treatment Across Specialties
 					</Typography>
-					<Typography component="p" fontSize={18}>
+					<Typography component="p" sx={{ fontSize: 18 }}>
 						Experienced Doctors Across All Specialties
 					</Typography>
 				</Box>
-				<Stack direction={"row"} gap={4} mt={5}>
+				<Stack direction={"row"} sx={{ gap: 4, mt: 5 }}>
 					{specialties.slice(0, 6).map((specialty: ISpecialty) => (
-						<Box
+						<Link
 							key={specialty.id}
-							sx={{
-								flex: 1,
-								width: "150px",
-								background: "rgba(245,245,245,1)",
-								border: "1px solid rgba(250,250,250,1)",
-								borderRadius: "10px",
-								textAlign: "center",
-								padding: "30px 10px",
-								"& img": {
-									width: "50px",
-									height: "50px",
-									margin: "0 auto",
-								},
-								"&:hover": {
-									border: "1px solid #1586fd",
-									transition: ".5s",
-									cursor: "pointer",
-								},
-							}}
+							href={`/doctors?specialties=${specialty.title}`}
+							style={{ flex: 1, textDecoration: "none" }}
 						>
-							<Image
-								src={specialty.icon}
-								width={100}
-								height={100}
-								alt={specialty.title}
-							/>
-							<Box>
-								<Typography component="p" fontWeight={500} fontSize={18} mt={2}>
-									{specialty.title}
-								</Typography>
+							<Box
+								sx={{
+									width: "100%",
+									background: "rgba(245,245,245,1)",
+									border: "1px solid rgba(250,250,250,1)",
+									borderRadius: "10px",
+									textAlign: "center",
+									padding: "30px 10px",
+									"& img": {
+										width: "50px",
+										height: "50px",
+										margin: "0 auto",
+									},
+									"&:hover": {
+										border: "1px solid #1586fd",
+										transition: ".5s",
+										cursor: "pointer",
+									},
+								}}
+							>
+								<Image
+									src={specialty.icon}
+									width={100}
+									height={100}
+									alt={specialty.title}
+								/>
+								<Box>
+									<Typography
+										component="p"
+										sx={{ fontWeight: 500, fontSize: 18, mt: 2 }}
+									>
+										{specialty.title}
+									</Typography>
+								</Box>
 							</Box>
-						</Box>
+						</Link>
 					))}
 				</Stack>
 				<Button variant="outlined" sx={{ marginTop: 3 }}>

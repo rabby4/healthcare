@@ -31,17 +31,17 @@ export default function RootLayout({
 	children: React.ReactNode
 }>) {
 	return (
-		<Providers>
-			<html lang="en">
-				<body className={`${geistRobotoCondensed.variable} antialiased`}>
+		<html lang="en">
+			<body className={`${geistRobotoCondensed.variable} antialiased`}>
+				<Providers>
 					<AppRouterCacheProvider>
 						<>
 							<Toaster position="top-center" />
 							{children}
 						</>
 					</AppRouterCacheProvider>
-				</body>
-			</html>
-		</Providers>
+				</Providers>
+			</body>
+		</html>
 	)
 }

@@ -19,11 +19,8 @@ const Sidebar = () => {
 	return (
 		<Box>
 			<Stack
-				sx={{ py: 1, mt: 1 }}
+				sx={{ py: 1, mt: 1, justifyContent: "center", alignItems: "center", gap: 1 }}
 				direction={"row"}
-				justifyContent={"center"}
-				alignItems={"center"}
-				gap={1}
 				component={Link}
 				href={"/"}
 			>

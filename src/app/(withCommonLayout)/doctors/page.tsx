@@ -35,6 +35,11 @@ const DoctorsPage = async ({ searchParams }: PropType) => {
 						{index === data.length - 1 ? null : <DashedLine />}
 					</Box>
 				))}
+				{data.length === 0 && (
+					<Box sx={{ textAlign: "center", p: 2 }}>
+						No doctors found for the selected specialty.
+					</Box>
+				)}
 			</Box>
 		</Container>
 	)

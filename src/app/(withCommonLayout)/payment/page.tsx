@@ -6,8 +6,9 @@ import CancelIcon from "@mui/icons-material/Cancel"
 import ErrorIcon from "@mui/icons-material/Error"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
+import { Suspense } from "react"
 
-const PaymentStatusPage = () => {
+const PaymentStatusContent = () => {
 	const status = useSearchParams().get("status") // could be success, cancel, failed
 
 	let icon
@@ -45,9 +46,9 @@ const PaymentStatusPage = () => {
 					mt: { xs: 5, md: 10 },
 				}}
 			>
-				<Stack justifyContent="center" alignItems="center">
+				<Stack sx={{ justifyContent: "center", alignItems: "center" }}>
 					{icon}
-					<Typography variant="h5" my={2}>
+					<Typography variant="h5" sx={{ my: 2 }}>
 						{title}
 					</Typography>
 					{status === "success" && (
@@ -67,5 +68,11 @@ const PaymentStatusPage = () => {
 		</Container>
 	)
 }
+
+const PaymentStatusPage = () => (
+	<Suspense>
+		<PaymentStatusContent />
+	</Suspense>
+)
 
 export default PaymentStatusPage

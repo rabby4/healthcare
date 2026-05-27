@@ -1,3 +1,5 @@
+"use client"
+
 import { IDoctor } from "@/types"
 import { Box, Button, Stack, Typography } from "@mui/material"
 import Image from "next/image"
@@ -8,12 +10,10 @@ const DoctorCard = ({ doctor }: { doctor: IDoctor }) => {
 		"https://static.vecteezy.com/system/resources/thumbnails/026/489/224/small_2x/muslim-malay-woman-doctor-in-hospital-with-copy-space-ai-generated-photo.jpg"
 
 	return (
-		<Stack direction="row" gap={2}>
+		<Stack direction="row" sx={{ gap: 2 }}>
 			<Stack
 				direction="row"
-				flex={1}
-				gap={3}
-				sx={{ height: 235, bgcolor: "white", p: 3 }}
+				sx={{ flex: 1, gap: 3, height: 235, bgcolor: "white", p: 3 }}
 			>
 				<Box sx={{ width: 190, height: 190 }}>
 					<Image
@@ -26,9 +26,9 @@ const DoctorCard = ({ doctor }: { doctor: IDoctor }) => {
 						}}
 					/>
 				</Box>
-				<Stack flex={1} justifyContent="space-between">
+				<Stack sx={{ flex: 1, justifyContent: "space-between" }}>
 					<Box sx={{ flex: 1 }}>
-						<Typography variant="h6" fontWeight={600}>
+						<Typography variant="h6" sx={{ fontWeight: 600 }}>
 							{doctor?.name}
 						</Typography>
 						<Typography sx={{ my: "2px", color: "secondary.main" }}>
@@ -54,9 +54,9 @@ const DoctorCard = ({ doctor }: { doctor: IDoctor }) => {
 							my: 3,
 						}}
 					/>
-					<Stack direction="row" justifyContent="space-between">
+					<Stack direction="row" sx={{ justifyContent: "space-between" }}>
 						<Box>
-							<Stack direction="row" alignItems="center">
+							<Stack direction="row" sx={{ alignItems: "center" }}>
 								<Typography
 									variant="h6"
 									sx={{ color: "primary.main", fontWeight: "600" }}
@@ -74,7 +74,7 @@ const DoctorCard = ({ doctor }: { doctor: IDoctor }) => {
 									(incl. Vat)
 								</Typography>
 							</Stack>
-							<Typography variant="caption" color="secondary.main">
+							<Typography variant="caption" sx={{ color: "secondary.main" }}>
 								Per consultation
 							</Typography>
 						</Box>
@@ -87,8 +87,8 @@ const DoctorCard = ({ doctor }: { doctor: IDoctor }) => {
 				</Stack>
 			</Stack>
 			<Stack sx={{ height: 235, bgcolor: "white", width: "400px", p: 3 }}>
-				<Box flex={1}>
-					<Typography color="secondary.main">Working in</Typography>
+				<Box sx={{ flex: 1 }}>
+					<Typography sx={{ color: "secondary.main" }}>Working in</Typography>
 					<Typography sx={{ fontWeight: "600", mt: "3px" }}>
 						{doctor?.currentWorkingPlace}
 					</Typography>
@@ -100,9 +100,11 @@ const DoctorCard = ({ doctor }: { doctor: IDoctor }) => {
 						my: "22px",
 					}}
 				/>
-				<Stack direction="row" justifyContent="space-between">
+				<Stack direction="row" sx={{ justifyContent: "space-between" }}>
 					<Box>
-						<Typography color="secondary.main">Total Experience</Typography>
+						<Typography sx={{ color: "secondary.main" }}>
+							Total Experience
+						</Typography>
 						<Typography variant="h6" sx={{ fontWeight: "600" }}>
 							{doctor?.experience}+ Years
 						</Typography>

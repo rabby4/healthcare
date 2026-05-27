@@ -28,21 +28,20 @@ const HeroSection = () => {
 				>
 					<Image src={assets.svgs.grid} alt="grid" />
 				</Box>
-				<Typography variant="h2" component={"h1"} fontWeight={700}>
+				<Typography variant="h2" component={"h1"} sx={{ fontWeight: 700 }}>
 					Healthier Hearts
 				</Typography>
-				<Typography variant="h2" component={"h1"} fontWeight={700}>
+				<Typography variant="h2" component={"h1"} sx={{ fontWeight: 700 }}>
 					Come From
 				</Typography>
 				<Typography
 					variant="h2"
 					component={"h1"}
-					color="primary.main"
-					fontWeight={700}
+					sx={{ color: "primary.main", fontWeight: 700 }}
 				>
 					Preventive Care
 				</Typography>
-				<Typography component={"p"} my={3}>
+				<Typography component={"p"} sx={{ my: 3 }}>
 					It is a long established fact that a reader will be distracted by the
 					readable content of a page when looking at its layout. The point of
 					using Lorem Ipsum is that it has a more-or-less normal distribution of
