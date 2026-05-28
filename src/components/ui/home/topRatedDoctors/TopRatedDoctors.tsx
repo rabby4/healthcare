@@ -1,95 +1,137 @@
-import {
-	Box,
-	Button,
-	Card,
-	CardActions,
-	CardContent,
-	Container,
-	Grid,
-	Typography,
-} from "@mui/material"
-import Image from "next/image"
-import LocationOnIcon from "@mui/icons-material/LocationOn"
-import { IDoctor } from "@/types"
+import { Box, Button, Container, Stack, Typography } from "@mui/material"
+import StarRoundedIcon from "@mui/icons-material/StarRounded"
+import { LinkArrow, SectionHead } from "../SectionHead"
 
-const TopRatedDoctors = async () => {
-	const res = await fetch("http://localhost:5000/api/v1/doctor/?page=1&limit=3")
-	const { data: doctors } = await res.json()
-	// console.log(doctors)
+const doctors = [
+	{
+		initials: "AR",
+		name: "Dr. Asma Rahman",
+		spec: "Cardiologist · MBBS, FCPS",
+		rating: "4.9",
+		reviews: "312 reviews",
+		exp: "14 yrs",
+		tags: ["English · Bangla", "Heart failure", "Hypertension"],
+		fee: "৳ 1,500",
+		grad: "linear-gradient(135deg, #0E7C7B, #16A085)",
+	},
+	{
+		initials: "TH",
+		name: "Dr. Tanvir Hossain",
+		spec: "Cardiologist · MD",
+		rating: "4.8",
+		reviews: "208 reviews",
+		exp: "11 yrs",
+		tags: ["English", "Arrhythmia", "Echo"],
+		fee: "৳ 1,200",
+		grad: "linear-gradient(135deg, #2A6FB5, #4A90D9)",
+	},
+	{
+		initials: "MI",
+		name: "Dr. Mehnaz Iqbal",
+		spec: "Neurologist · DM, FCPS",
+		rating: "4.9",
+		reviews: "184 reviews",
+		exp: "9 yrs",
+		tags: ["English · Bangla", "Migraine", "Epilepsy"],
+		fee: "৳ 1,400",
+		grad: "linear-gradient(135deg, #7B4DA8, #A26CC8)",
+	},
+	{
+		initials: "SK",
+		name: "Dr. Sadia Khan",
+		spec: "Pediatrician · MBBS, MCPS",
+		rating: "4.9",
+		reviews: "402 reviews",
+		exp: "12 yrs",
+		tags: ["Bangla", "Newborn care", "Vaccines"],
+		fee: "৳ 900",
+		grad: "linear-gradient(135deg, #C56A3F, #E59364)",
+	},
+]
+
+const TopRatedDoctors = () => {
 	return (
-		<Box
-			sx={{
-				my: 10,
-				padding: 30,
-				background: "rgba(20, 20, 20, 0.1)",
-				clipPath: "polygon(0 0, 100% 25%, 100% 100%, 0 75%)",
-			}}
-		>
-			<Box sx={{ textAlign: "center" }}>
-				<Typography variant="h4" component={"h1"} sx={{ fontWeight: 700 }}>
-					Our Top Rated Doctors
-				</Typography>
-				<Typography component={"p"} sx={{ fontSize: 18, mt: 2 }}>
-					Access to expert physicians and surgeons, advanced technologies
-				</Typography>
-				<Typography component={"p"} sx={{ fontSize: 18 }}>
-					and top-quality surgery facilities right here
-				</Typography>
-			</Box>
-			<Container sx={{ margin: "30px auto" }}>
-				<Grid container spacing={2}>
-					{doctors?.map((doctor: IDoctor) => (
-						<Grid key={doctor?.id} size={4}>
-							<Card>
-								<Box
-									sx={{
-										width: "100%",
-										height: 300,
-										"& img": {
-											width: "100%",
-											height: "100%",
-											objectFit: "cover",
-											overflow: "hidden",
-										},
-									}}
-								>
-									<Image
-										src={doctor?.profilePhoto}
-										width={500}
-										height={500}
-										alt={doctor?.name}
-									/>
+		<Box component="section" id="doctors" sx={{ py: { xs: 9, md: 15 } }}>
+			<Container>
+				<SectionHead
+					eyebrow="Top rated"
+					title="Meet a few of our doctors."
+					sub="Hand-picked, verified, and reviewed by thousands of patients."
+					action={<LinkArrow href="/doctors">Browse all doctors →</LinkArrow>}
+				/>
+
+				<Box
+					sx={{
+						display: "grid",
+						gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+						gap: 2.5,
+					}}
+				>
+					{doctors.map((d) => (
+						<Stack
+							key={d.initials}
+							sx={{
+								bgcolor: "#fff",
+								border: "1px solid",
+								borderColor: "divider",
+								borderRadius: "22px",
+								p: 3,
+								gap: 2.5,
+								transition: "transform 200ms ease, box-shadow 200ms ease",
+								"&:hover": {
+									transform: "translateY(-3px)",
+									boxShadow: "0 24px 40px -20px rgba(15, 30, 46, 0.18)",
+								},
+							}}
+						>
+							<Stack direction="row" sx={{ alignItems: "flex-start", gap: 2 }}>
+								<Box sx={{ width: 64, height: 64, borderRadius: "50%", background: d.grad, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, fontWeight: 600, flexShrink: 0 }}>
+									{d.initials}
 								</Box>
-								<CardContent>
-									<Typography gutterBottom variant="h5" component="div">
-										{doctor?.name}
+								<Box>
+									<Typography sx={{ fontSize: 17, fontWeight: 700, color: "text.primary", letterSpacing: "-0.01em" }}>
+										{d.name}
 									</Typography>
-									<Typography variant="body2" sx={{ color: "text.secondary" }}>
-										{doctor?.qualification}, {doctor?.designation}
+									<Typography sx={{ fontSize: 13, color: "text.secondary", mt: 0.5 }}>
+										{d.spec}
 									</Typography>
-									<Typography
-										variant="body2"
-										sx={{ color: "text.secondary", mt: 1 }}
-									>
-										<LocationOnIcon /> {doctor?.address}
-									</Typography>
-								</CardContent>
-								<CardActions
-									sx={{ justifyContent: "space-between", px: 2, pb: 3 }}
+									<Stack direction="row" sx={{ alignItems: "center", gap: 1, mt: 1.25, color: "secondary.main", fontSize: 12 }}>
+										<Stack direction="row" sx={{ alignItems: "center", gap: 0.5, color: "text.primary", fontWeight: 600 }}>
+											<StarRoundedIcon sx={{ fontSize: 14, color: "warning.main" }} />
+											{d.rating}
+										</Stack>
+										<Box sx={{ width: 3, height: 3, borderRadius: "50%", bgcolor: "divider" }} />
+										<Typography sx={{ fontSize: 12, color: "secondary.main" }}>{d.reviews}</Typography>
+										<Box sx={{ width: 3, height: 3, borderRadius: "50%", bgcolor: "divider" }} />
+										<Typography sx={{ fontSize: 12, color: "secondary.main" }}>{d.exp}</Typography>
+									</Stack>
+								</Box>
+							</Stack>
+
+							<Stack direction="row" sx={{ flexWrap: "wrap", gap: 0.75 }}>
+								{d.tags.map((t) => (
+									<Box key={t} sx={{ fontSize: 11, letterSpacing: "0.04em", px: 1.25, py: 0.625, bgcolor: "secondary.light", color: "text.secondary", borderRadius: "999px", fontWeight: 500 }}>
+										{t}
+									</Box>
+								))}
+							</Stack>
+
+							<Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center", pt: 2.25, borderTop: "1px solid", borderColor: "divider" }}>
+								<Typography sx={{ fontSize: 12, color: "secondary.main" }}>
+									<Box component="span" sx={{ fontSize: 20, fontWeight: 700, color: "text.primary" }}>
+										{d.fee}
+									</Box>{" "}
+									/ visit
+								</Typography>
+								<Button
+									href="/doctors"
+									sx={{ bgcolor: "text.primary", py: "9px", px: 2.25, fontSize: 13, "&:hover": { bgcolor: "primary.main" } }}
 								>
-									<Button sx={{ flex: 1 }}>Book Now</Button>
-									<Button variant="outlined" sx={{ flex: 1 }}>
-										View Profile
-									</Button>
-								</CardActions>
-							</Card>
-						</Grid>
+									Book →
+								</Button>
+							</Stack>
+						</Stack>
 					))}
-				</Grid>
-				<Box sx={{ margin: "20px", textAlign: "center" }}>
-					<Button variant="outlined" sx={{ marginTop: 3 }} href="/doctors">
-						View All
-					</Button>
 				</Box>
 			</Container>
 		</Box>

@@ -1,180 +1,82 @@
-import assets from "@/assets"
-import { Box, Container, Grid, Typography } from "@mui/material"
-import Image from "next/image"
-import ChooseUs from "@/assets/choose-us.png"
+import { Box, Container, Typography } from "@mui/material"
+import VerifiedUserRoundedIcon from "@mui/icons-material/VerifiedUserRounded"
+import LockRoundedIcon from "@mui/icons-material/LockRounded"
+import VideocamRoundedIcon from "@mui/icons-material/VideocamRounded"
+import DescriptionRoundedIcon from "@mui/icons-material/DescriptionRounded"
+import ScheduleRoundedIcon from "@mui/icons-material/ScheduleRounded"
+import PublicRoundedIcon from "@mui/icons-material/PublicRounded"
+import { SectionHead } from "../SectionHead"
 
-const servicesData = [
+const items = [
 	{
-		imageSrc: assets.svgs.award,
-		title: "Award Winning Service",
-		description:
-			"Duas molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa qui offici",
+		Icon: VerifiedUserRoundedIcon,
+		title: "Verified doctors only",
+		desc: "Every doctor on Medicare is BMDC-registered, identity-verified, and reviewed by our medical board before they see a single patient.",
 	},
 	{
-		imageSrc: assets.svgs.care,
-		title: "Best Quality Pregnancy Care",
-		description:
-			"Duas molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa qui offici",
+		Icon: LockRoundedIcon,
+		title: "Secure SSLCommerz payments",
+		desc: "Cards, bKash, Nagad, bank transfers — all routed through SSLCommerz. No card data ever touches our servers.",
 	},
 	{
-		imageSrc: assets.svgs.equipment,
-		title: "Complete Medical Equipments",
-		description:
-			"Duas molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa qui offici",
+		Icon: VideocamRoundedIcon,
+		title: "Encrypted video, Agora-powered",
+		desc: "Studio-grade quality with end-to-end encryption. Share files, take notes, and pull up your medical history mid-call.",
 	},
 	{
-		imageSrc: assets.svgs.call,
-		title: "Dedicated Emergency Care",
-		description:
-			"Duas molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa qui offici",
+		Icon: DescriptionRoundedIcon,
+		title: "Digital prescriptions",
+		desc: "Signed, dated, downloadable. Forward to any pharmacy, or use Medicare's partner network for same-day home delivery.",
+	},
+	{
+		Icon: ScheduleRoundedIcon,
+		title: "30-minute slot guarantee",
+		desc: "Slots are held for 30 minutes while you pay. If you don't make it, the slot auto-frees — no being charged for what you didn't get.",
+	},
+	{
+		Icon: PublicRoundedIcon,
+		title: "Care anywhere in Bangladesh",
+		desc: "From Dhaka to a tea garden in Sylhet — if you have signal, you have a doctor. No travel, no queues, no chamber fees.",
 	},
 ]
 
 const WhyUs = () => {
 	return (
-		<Container>
-			<Box>
-				<Box sx={{ textAlign: "center" }}>
-					<Typography
-						variant="h6"
-						component={"h1"}
-						sx={{ color: "primary.main", fontWeight: 700 }}
-					>
-						Why Us
-					</Typography>
-					<Typography variant="h4" component="h1" sx={{ fontWeight: 700 }}>
-						Why Choose Us
-					</Typography>
+		<Box component="section" sx={{ py: { xs: 9, md: 15 }, bgcolor: "secondary.light" }}>
+			<Container>
+				<SectionHead
+					eyebrow="Why Medicare"
+					title="Built for trust. Designed for ease."
+				/>
+
+				<Box
+					sx={{
+						display: "grid",
+						gridTemplateColumns: { xs: "1fr", md: "repeat(3, 1fr)" },
+						gap: "1px",
+						bgcolor: "divider",
+						border: "1px solid",
+						borderColor: "divider",
+						borderRadius: "24px",
+						overflow: "hidden",
+					}}
+				>
+					{items.map(({ Icon, title, desc }) => (
+						<Box key={title} sx={{ bgcolor: "#fff", p: "32px 28px", display: "flex", flexDirection: "column", gap: 2 }}>
+							<Box sx={{ width: 44, height: 44, borderRadius: "12px", bgcolor: "primary.light", color: "primary.main", display: "flex", alignItems: "center", justifyContent: "center" }}>
+								<Icon />
+							</Box>
+							<Typography sx={{ fontSize: 18, fontWeight: 600, color: "text.primary" }}>
+								{title}
+							</Typography>
+							<Typography sx={{ fontSize: 14, color: "text.secondary", lineHeight: 1.6 }}>
+								{desc}
+							</Typography>
+						</Box>
+					))}
 				</Box>
-				<Grid spacing={2} container sx={{ my: 5 }}>
-					<Grid size={{ md: 6 }}>
-						{/* box number 1 */}
-						<Box
-							sx={{
-								display: "flex",
-								gap: "15px",
-								background: "rgba(245, 245, 245, 1)",
-								padding: "15px",
-								alignItems: "center",
-								borderRadius: "10px 10px 80px 10px",
-							}}
-						>
-							<Box
-								sx={{
-									background: "#fff",
-									padding: "10px",
-									borderRadius: "5px",
-								}}
-							>
-								<Image src={servicesData[0].imageSrc} width={50} alt="award" />
-							</Box>
-							<Box>
-								<Typography variant="h6" component="h6" sx={{ fontWeight: 600 }}>
-									{servicesData[0].title}
-								</Typography>
-								<Typography variant="body2" sx={{ color: "primary.body1" }}>
-									{servicesData[0].description}
-								</Typography>
-							</Box>
-						</Box>
-						{/* box number 2 */}
-						<Box
-							sx={{
-								display: "flex",
-								gap: "15px",
-								background: "rgba(245, 245, 245, 1)",
-								padding: "15px",
-								alignItems: "center",
-								borderRadius: "10px 80px 10px 10px",
-								margin: "20px 0px",
-							}}
-						>
-							<Box
-								sx={{
-									background: "#fff",
-									padding: "10px",
-									borderRadius: "5px",
-								}}
-							>
-								<Image src={servicesData[1].imageSrc} width={50} alt="award" />
-							</Box>
-							<Box>
-								<Typography variant="h6" component="h6" sx={{ fontWeight: 600 }}>
-									{servicesData[1].title}
-								</Typography>
-								<Typography variant="body2" sx={{ color: "primary.body1" }}>
-									{servicesData[1].description}
-								</Typography>
-							</Box>
-						</Box>
-						{/* box number 3 */}
-						<Box
-							sx={{
-								display: "flex",
-								gap: "15px",
-								background: "rgba(245, 245, 245, 1)",
-								padding: "15px",
-								alignItems: "center",
-								borderRadius: "10px 10px 80px 10px",
-							}}
-						>
-							<Box
-								sx={{
-									background: "#fff",
-									padding: "10px",
-									borderRadius: "5px",
-								}}
-							>
-								<Image src={servicesData[2].imageSrc} width={50} alt="award" />
-							</Box>
-							<Box>
-								<Typography variant="h6" component="h6" sx={{ fontWeight: 600 }}>
-									{servicesData[2].title}
-								</Typography>
-								<Typography variant="body2" sx={{ color: "primary.body1" }}>
-									{servicesData[2].description}
-								</Typography>
-							</Box>
-						</Box>
-						{/* box number 4 */}
-						<Box
-							sx={{
-								display: "flex",
-								gap: "15px",
-								background: "rgba(245, 245, 245, 1)",
-								padding: "15px",
-								alignItems: "center",
-								borderRadius: "10px 80px 10px 10px",
-								marginTop: "20px",
-							}}
-						>
-							<Box
-								sx={{
-									background: "#fff",
-									padding: "10px",
-									borderRadius: "5px",
-								}}
-							>
-								<Image src={servicesData[3].imageSrc} width={50} alt="award" />
-							</Box>
-							<Box>
-								<Typography variant="h6" component="h6" sx={{ fontWeight: 600 }}>
-									{servicesData[3].title}
-								</Typography>
-								<Typography variant="body2" sx={{ color: "primary.body1" }}>
-									{servicesData[3].description}
-								</Typography>
-							</Box>
-						</Box>
-					</Grid>
-					<Grid size={{ md: 6 }}>
-						<Box sx={{ display: "flex", justifyContent: "center" }}>
-							<Image src={ChooseUs} width={400} alt="why choose us" />
-						</Box>
-					</Grid>
-				</Grid>
-			</Box>
-		</Container>
+			</Container>
+		</Box>
 	)
 }
 
