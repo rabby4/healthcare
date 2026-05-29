@@ -7,16 +7,27 @@ import type { NextRequest } from "next/server"
 type Role = keyof typeof roleBasedPrivateRoutes
 
 const AuthRoutes = ["/login", "/register"]
+// Routes any logged-in user can access (exact match).
 const commonPrivateRoutes = [
 	"/dashboard",
 	"/dashboard/change-password",
-	"/doctors",
+]
+// Path prefixes anyone can browse (public — both logged-in and out).
+const publicPrefixes = ["/doctors"]
+// Resource routes both admin tiers can manage.
+const adminTierRoutes = [
+	/^\/dashboard\/doctors(\/|$)/,
+	/^\/dashboard\/specialties(\/|$)/,
+	/^\/dashboard\/schedules(\/|$)/,
+	/^\/dashboard\/appointments(\/|$)/,
+	/^\/dashboard\/reviews(\/|$)/,
+	/^\/dashboard\/users(\/|$)/,
 ]
 const roleBasedPrivateRoutes = {
-	PATIENT: [/^\/dashboard\/patient/],
-	DOCTOR: [/^\/dashboard\/doctor/],
-	ADMIN: [/^\/dashboard\/admin/],
-	SUPER_ADMIN: [/^\/dashboard\/super-admin/],
+	PATIENT: [/^\/dashboard\/patient(\/|$)/],
+	DOCTOR: [/^\/dashboard\/doctor(\/|$)/],
+	ADMIN: adminTierRoutes,
+	SUPER_ADMIN: [/^\/dashboard\/admins(\/|$)/, ...adminTierRoutes],
 }
 
 export async function proxy(request: NextRequest) {
@@ -25,36 +36,42 @@ export async function proxy(request: NextRequest) {
 	const cookie = await cookies()
 	const accessToken = cookie.get("accessToken")?.value
 
-	// const accessToken = cookies().get('accessToken')?.value;
-
-	if (!accessToken) {
-		if (AuthRoutes.includes(pathname)) {
-			return NextResponse.next()
-		} else {
-			return NextResponse.redirect(new URL("/login", request.url))
+	let decodedData: any = null
+	if (accessToken) {
+		try {
+			decodedData = jwtDecode(accessToken)
+			if (decodedData?.exp && decodedData.exp * 1000 < Date.now()) {
+				decodedData = null
+			}
+		} catch {
+			decodedData = null
 		}
 	}
 
-	if (
-		accessToken &&
-		(commonPrivateRoutes.includes(pathname) ||
-			commonPrivateRoutes.some((route) => pathname.startsWith(route)))
-	) {
+	// /login and /register are always reachable. If the cookie is stale,
+	// clear it so the user can log in again cleanly.
+	if (AuthRoutes.includes(pathname)) {
+		const res = NextResponse.next()
+		if (accessToken && !decodedData) res.cookies.delete("accessToken")
+		return res
+	}
+
+	// Public prefixes (e.g. /doctors) — always allowed.
+	if (publicPrefixes.some((p) => pathname === p || pathname.startsWith(p + "/"))) {
 		return NextResponse.next()
 	}
 
-	let decodedData = null
-
-	if (accessToken) {
-		decodedData = jwtDecode(accessToken) as any
+	// Not authenticated (no token, invalid token, or expired token)
+	if (!decodedData) {
+		return NextResponse.redirect(new URL("/login", request.url))
 	}
 
-	const role = decodedData?.role
+	// Shared dashboard routes any logged-in user can access.
+	if (commonPrivateRoutes.includes(pathname)) {
+		return NextResponse.next()
+	}
 
-	// if (role === 'ADMIN' && pathname.startsWith('/dashboard/admin')) {
-	//    return NextResponse.next();
-	// }
-
+	const role = decodedData.role
 	if (role && roleBasedPrivateRoutes[role as Role]) {
 		const routes = roleBasedPrivateRoutes[role as Role]
 		if (routes.some((route) => pathname.match(route))) {
@@ -62,7 +79,8 @@ export async function proxy(request: NextRequest) {
 		}
 	}
 
-	return NextResponse.redirect(new URL("/", request.url))
+	// Authenticated but not authorized for this path — bounce to their overview.
+	return NextResponse.redirect(new URL("/dashboard", request.url))
 }
 
 export const config = {
