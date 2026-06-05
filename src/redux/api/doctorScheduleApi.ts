@@ -11,7 +11,8 @@ export const doctorScheduleApi = baseApi.injectEndpoints({
 				method: "POST",
 				data,
 			}),
-			invalidatesTags: [tagTypes.doctorSchedule],
+			// Claiming a slot removes it from the open /schedule pool, so refresh both.
+			invalidatesTags: [tagTypes.doctorSchedule, tagTypes.schedule],
 		}),
 		getAllDoctorSchedules: build.query({
 			query: (arg: Record<string, any>) => {
@@ -36,20 +37,16 @@ export const doctorScheduleApi = baseApi.injectEndpoints({
 			}),
 			providesTags: [tagTypes.doctorSchedule],
 		}),
-		getMySchedule: build.query({
-			query: () => ({
-				url: "/doctor-schedule/my-schedules",
-				method: "GET",
-			}),
-			providesTags: [tagTypes.doctorSchedule],
-		}),
-
+		// NOTE: GET /doctor-schedule/my-schedule is NOT self-scoped on the backend
+		// (it leaks every doctor's slots). Use getAllDoctorSchedules({ doctorId })
+		// for a reliable "my slots" list instead.
 		deleteDoctorSchedule: build.mutation({
 			query: (id: string) => ({
 				url: `/doctor-schedule/${id}`,
 				method: "DELETE",
 			}),
-			invalidatesTags: [tagTypes.doctorSchedule],
+			// Removing a claimed slot frees it back into the open /schedule pool.
+			invalidatesTags: [tagTypes.doctorSchedule, tagTypes.schedule],
 		}),
 	}),
 })
@@ -58,6 +55,5 @@ export const {
 	useCreateDoctorScheduleMutation,
 	useGetAllDoctorSchedulesQuery,
 	useGetDoctorScheduleQuery,
-	useGetMyScheduleQuery,
 	useDeleteDoctorScheduleMutation,
 } = doctorScheduleApi

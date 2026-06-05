@@ -10,21 +10,21 @@ const specialtiesApi = baseApi.injectEndpoints({
 				contentType: "multipart/form-data",
 				data,
 			}),
-			invalidatesTags: [tagTypes.doctor],
+			invalidatesTags: [tagTypes.specialties],
 		}),
 		getAllSpecialties: build.query({
 			query: () => ({
 				url: "/specialties",
 				method: "GET",
 			}),
-			providesTags: [tagTypes.doctor],
+			providesTags: [tagTypes.specialties],
 		}),
 		deleteSpecialty: build.mutation({
 			query: (id) => ({
 				url: `/specialties/${id}`,
 				method: "DELETE",
 			}),
-			invalidatesTags: [tagTypes.doctor],
+			invalidatesTags: [tagTypes.specialties],
 		}),
 	}),
 	overrideExisting: false,

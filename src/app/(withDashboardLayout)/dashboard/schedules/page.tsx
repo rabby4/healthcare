@@ -1,81 +1,24 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
 import { Box, Button, Stack, Typography } from "@mui/material"
-import KeyboardArrowDownRoundedIcon from "@mui/icons-material/KeyboardArrowDownRounded"
-import SearchRoundedIcon from "@mui/icons-material/SearchRounded"
+import dayjs from "dayjs"
 import { useState } from "react"
+import { toast } from "sonner"
 
-import AvatarGradient from "@/components/dashboard/shell/AvatarGradient"
 import PageHead from "@/components/dashboard/shell/PageHead"
 import Stat from "@/components/dashboard/shell/Stat"
-import { AvatarVariant, MONO, SHELL } from "@/components/dashboard/shell/tokens"
+import { MONO, SHELL } from "@/components/dashboard/shell/tokens"
+import {
+	useDeleteScheduleMutation,
+	useGetAllSchedulesQuery,
+} from "@/redux/api/scheduleApi"
 import GenerateSlotsModal from "./GenerateSlotsModal"
 
-type DoctorRow = {
-	initials: string
-	variant: AvatarVariant
-	name: string
-	specialty: string
-	range: string
-	generated: number
-	booked: number
-	open: number
-	actionLabel: string
-}
-
-const rows: DoctorRow[] = [
-	{
-		initials: "AR",
-		variant: "teal",
-		name: "Dr. Asma Rahman",
-		specialty: "Cardiology",
-		range: "Mon–Fri · 09:00–18:00",
-		generated: 90,
-		booked: 62,
-		open: 28,
-		actionLabel: "Generate more",
-	},
-	{
-		initials: "TH",
-		variant: "blue",
-		name: "Dr. Tanvir Hossain",
-		specialty: "Cardiology",
-		range: "Mon–Sat · 10:00–16:00",
-		generated: 72,
-		booked: 48,
-		open: 24,
-		actionLabel: "Generate more",
-	},
-	{
-		initials: "SK",
-		variant: "orange",
-		name: "Dr. Sadia Khan",
-		specialty: "Pediatrics",
-		range: "Sun–Thu · 09:00–14:00",
-		generated: 60,
-		booked: 55,
-		open: 5,
-		actionLabel: "Generate more",
-	},
-	{
-		initials: "FA",
-		variant: "green",
-		name: "Dr. Faisal Ahmed",
-		specialty: "Orthopedics",
-		range: "—",
-		generated: 0,
-		booked: 0,
-		open: 0,
-		actionLabel: "Generate now",
-	},
-]
-
 const headers = [
-	{ label: "Doctor", align: "left" as const, width: "28%" },
-	{ label: "Range", align: "left" as const },
-	{ label: "Generated", align: "right" as const },
-	{ label: "Booked", align: "right" as const },
-	{ label: "Open", align: "right" as const },
+	{ label: "Date", align: "left" as const, width: "34%" },
+	{ label: "Start", align: "left" as const },
+	{ label: "End", align: "left" as const },
 	{ label: "Actions", align: "right" as const },
 ]
 
@@ -87,9 +30,8 @@ const cellSx = (last: boolean) => ({
 	verticalAlign: "middle" as const,
 })
 
-const numCellSx = (last: boolean) => ({
+const timeCellSx = (last: boolean) => ({
 	...cellSx(last),
-	textAlign: "right" as const,
 	fontFamily: MONO,
 	fontVariantNumeric: "tabular-nums" as const,
 })
@@ -100,50 +42,72 @@ const SchedulesPage = () => {
 	const openModal = () => setModalOpen(true)
 	const closeModal = () => setModalOpen(false)
 
+	// Default the list to the next 30 days. The backend filters on a DateTime
+	// column, so the params MUST be full ISO datetimes (date-only 400s in Prisma).
+	const startDate = dayjs().startOf("day").toISOString()
+	const endDate = dayjs().add(30, "day").endOf("day").toISOString()
+
+	const [page, setPage] = useState(1)
+	const limit = 10
+
+	const { data, isLoading, isError } = useGetAllSchedulesQuery({
+		startDate,
+		endDate,
+		page,
+		limit,
+	})
+
+	const slots: any[] = data?.schedule ?? []
+	const meta = data?.meta
+
+	const [deleteSchedule, { isLoading: isDeleting }] = useDeleteScheduleMutation()
+
+	const handleDelete = async (id: string) => {
+		if (!window.confirm("Are you sure?")) return
+		try {
+			await deleteSchedule(id).unwrap()
+			toast.success("Slot deleted")
+		} catch (err: any) {
+			toast.error(err?.data?.message || err?.message || "Something went wrong")
+		}
+	}
+
+	const total = meta?.total ?? slots.length
+	const metaLimit = meta?.limit ?? limit
+	const metaPage = meta?.page ?? page
+	const pageCount = total ? Math.ceil(total / metaLimit) : 1
+	const rangeStart = total === 0 ? 0 : (metaPage - 1) * metaLimit + 1
+	const rangeEnd = total === 0 ? 0 : Math.min(metaPage * metaLimit, total)
+
+	const colSpan = headers.length
+
 	return (
 		<>
 			<PageHead
 				title="Schedule slots"
-				subtitle="Generate 30-minute slots across doctors and date ranges in bulk."
+				subtitle="Generate 30-minute slots across a date and time range in bulk."
 				actions={<Button onClick={openModal}>+ Generate slots</Button>}
 			/>
 
 			<Box
 				sx={{
 					display: "grid",
-					gridTemplateColumns: {
-						xs: "1fr",
-						sm: "repeat(2, 1fr)",
-						lg: "repeat(4, 1fr)",
-					},
+					gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)" },
 					gap: 2,
 					mb: 3,
 				}}
 			>
 				<Stat
-					label="Slots generated · this week"
-					value="2,140"
+					label="Slots · next 30 days"
+					value={isLoading ? "—" : total.toLocaleString()}
 					deltaTrend="neutral"
-					deltaLabel="across 240 doctors"
+					deltaLabel={`${dayjs(startDate).format("DD MMM")} → ${dayjs(endDate).format("DD MMM")}`}
 				/>
 				<Stat
-					label="Booked"
-					value="1,492"
-					delta="70%"
-					deltaTrend="up"
-					deltaLabel="utilization"
-				/>
-				<Stat
-					label="Open"
-					value="648"
+					label="Booking insight"
+					value="—"
 					deltaTrend="neutral"
-					deltaLabel="still bookable"
-				/>
-				<Stat
-					label="Doctors with no slots"
-					value="14"
-					deltaTrend="down"
-					deltaLabel="needs attention"
+					deltaLabel="not reported by this view"
 				/>
 			</Box>
 
@@ -168,77 +132,12 @@ const SchedulesPage = () => {
 						flexWrap: "wrap",
 					}}
 				>
-					<Stack
-						direction="row"
-						sx={{
-							alignItems: "center",
-							gap: 1,
-							px: 1.75,
-							py: 1,
-							bgcolor: SHELL.bgSoft,
-							borderRadius: "10px",
-							border: "1px solid transparent",
-							fontSize: 13,
-							color: "text.secondary",
-							flex: 1,
-							minWidth: 220,
-						}}
-					>
-						<SearchRoundedIcon sx={{ fontSize: 16 }} />
-						<Box
-							component="input"
-							placeholder="Search doctor…"
-							sx={{
-								flex: 1,
-								bgcolor: "transparent",
-								border: "none",
-								outline: "none",
-								fontSize: 13,
-								color: "text.primary",
-								"&::placeholder": { color: "text.secondary" },
-							}}
-						/>
-					</Stack>
-					<Stack
-						direction="row"
-						sx={{
-							alignItems: "center",
-							gap: 1,
-							px: 1.75,
-							py: 1,
-							bgcolor: "#fff",
-							border: "1px solid",
-							borderColor: "divider",
-							borderRadius: "10px",
-							fontSize: 13,
-							color: "text.primary",
-							cursor: "pointer",
-							"&:hover": { borderColor: "text.primary" },
-						}}
-					>
-						<Box component="span">Specialty: All</Box>
-						<KeyboardArrowDownRoundedIcon sx={{ fontSize: 14, color: "text.secondary" }} />
-					</Stack>
-					<Stack
-						direction="row"
-						sx={{
-							alignItems: "center",
-							gap: 1,
-							px: 1.75,
-							py: 1,
-							bgcolor: "#fff",
-							border: "1px solid",
-							borderColor: "divider",
-							borderRadius: "10px",
-							fontSize: 13,
-							color: "text.primary",
-							cursor: "pointer",
-							"&:hover": { borderColor: "text.primary" },
-						}}
-					>
-						<Box component="span">Week of 25 May</Box>
-						<KeyboardArrowDownRoundedIcon sx={{ fontSize: 14, color: "text.secondary" }} />
-					</Stack>
+					<Typography sx={{ fontSize: 14, fontWeight: 600, color: "text.primary", flex: 1 }}>
+						Generated slots
+					</Typography>
+					<Typography sx={{ fontSize: 13, color: "text.secondary" }}>
+						{dayjs(startDate).format("DD MMM")} — {dayjs(endDate).format("DD MMM")}
+					</Typography>
 				</Stack>
 
 				{/* Table */}
@@ -270,93 +169,104 @@ const SchedulesPage = () => {
 							</Box>
 						</Box>
 						<Box component="tbody">
-							{rows.map((r, i) => {
-								const isLast = i === rows.length - 1
-								const isEmpty = r.generated === 0
-								return (
-									<Box
-										key={r.name}
-										component="tr"
-										sx={{ "&:hover td": { bgcolor: SHELL.bgSoft } }}
-									>
-										<Box component="td" sx={cellSx(isLast)}>
-											<Stack direction="row" sx={{ alignItems: "center", gap: 1.5 }}>
-												<AvatarGradient initials={r.initials} variant={r.variant} size={36} />
-												<Box>
-													<Typography sx={{ fontSize: 14, fontWeight: 600, color: "text.primary" }}>
-														{r.name}
-													</Typography>
-													<Typography sx={{ fontSize: 12, color: "text.secondary", mt: "1px" }}>
-														{r.specialty}
-													</Typography>
-												</Box>
-											</Stack>
-										</Box>
+							{isLoading &&
+								[0, 1, 2, 3].map((i) => (
+									<Box component="tr" key={`sk-${i}`}>
 										<Box
 											component="td"
+											colSpan={colSpan}
 											sx={{
-												...cellSx(isLast),
-												color: r.range === "—" ? "text.secondary" : "text.primary",
+												...cellSx(i === 3),
+												color: "text.secondary",
+												fontSize: 13,
 											}}
 										>
-											{r.range}
-										</Box>
-										<Box
-											component="td"
-											sx={{
-												...numCellSx(isLast),
-												color: isEmpty ? "text.secondary" : "text.primary",
-											}}
-										>
-											{r.generated}
-										</Box>
-										<Box
-											component="td"
-											sx={{
-												...numCellSx(isLast),
-												color: isEmpty ? "text.secondary" : "text.primary",
-											}}
-										>
-											{r.booked}
-										</Box>
-										<Box
-											component="td"
-											sx={{
-												...numCellSx(isLast),
-												color: isEmpty ? "text.secondary" : "text.primary",
-											}}
-										>
-											{r.open}
-										</Box>
-										<Box
-											component="td"
-											sx={{
-												...cellSx(isLast),
-												textAlign: "right",
-											}}
-										>
-											<Box
-												component="button"
-												onClick={openModal}
-												sx={{
-													fontSize: 12,
-													fontWeight: 600,
-													px: 1,
-													py: 0.5,
-													borderRadius: "6px",
-													border: "none",
-													bgcolor: "transparent",
-													cursor: "pointer",
-													color: "primary.main",
-													"&:hover": { bgcolor: SHELL.bgSoft, color: "primary.main" },
-												}}
-											>
-												{r.actionLabel}
-											</Box>
+											Loading…
 										</Box>
 									</Box>
-								)
-							})}
+								))}
+
+							{!isLoading && isError && (
+								<Box component="tr">
+									<Box
+										component="td"
+										colSpan={colSpan}
+										sx={{
+											...cellSx(true),
+											color: SHELL.urgent,
+											textAlign: "center",
+											fontSize: 13,
+										}}
+									>
+										Failed to load slots. Please try again.
+									</Box>
+								</Box>
+							)}
+
+							{!isLoading && !isError && slots.length === 0 && (
+								<Box component="tr">
+									<Box
+										component="td"
+										colSpan={colSpan}
+										sx={{
+											...cellSx(true),
+											color: "text.secondary",
+											textAlign: "center",
+											fontSize: 13,
+										}}
+									>
+										No slots in this range. Generate some.
+									</Box>
+								</Box>
+							)}
+
+							{!isLoading &&
+								!isError &&
+								slots.map((s, i) => {
+									const isLast = i === slots.length - 1
+									return (
+										<Box
+											key={s.id}
+											component="tr"
+											sx={{ "&:hover td": { bgcolor: SHELL.bgSoft } }}
+										>
+											<Box component="td" sx={cellSx(isLast)}>
+												{dayjs(s.startDateTime).format("ddd, DD MMM YYYY")}
+											</Box>
+											<Box component="td" sx={timeCellSx(isLast)}>
+												{dayjs(s.startDateTime).format("hh:mm A")}
+											</Box>
+											<Box component="td" sx={timeCellSx(isLast)}>
+												{dayjs(s.endDateTime).format("hh:mm A")}
+											</Box>
+											<Box
+												component="td"
+												sx={{ ...cellSx(isLast), textAlign: "right" }}
+											>
+												<Box
+													component="button"
+													onClick={() => handleDelete(s.id)}
+													disabled={isDeleting}
+													sx={{
+														fontSize: 12,
+														fontWeight: 600,
+														px: 1,
+														py: 0.5,
+														borderRadius: "6px",
+														border: "none",
+														bgcolor: "transparent",
+														cursor: isDeleting ? "not-allowed" : "pointer",
+														color: SHELL.urgent,
+														opacity: isDeleting ? 0.5 : 1,
+														"&:hover": { bgcolor: SHELL.bgSoft },
+													}}
+												>
+													Delete
+												</Box>
+											</Box>
+										</Box>
+									)
+								})}
 						</Box>
 					</Box>
 				</Box>
@@ -374,47 +284,37 @@ const SchedulesPage = () => {
 						color: "text.secondary",
 					}}
 				>
-					<Box>Showing 1 — 4 of 240 doctors</Box>
+					<Box>
+						Showing {rangeStart} — {rangeEnd} of {total} slots
+					</Box>
 					<Stack direction="row" sx={{ gap: 0.5 }}>
-						{[
-							{ label: "‹", disabled: true },
-							{ label: "1", active: true },
-							{ label: "2" },
-							{ label: "3" },
-							{ label: "›" },
-						].map((p, i) => (
-							<Box
-								key={i}
-								component="button"
-								disabled={p.disabled}
-								sx={{
-									width: 30,
-									height: 30,
-									borderRadius: "8px",
-									border: "none",
-									bgcolor: p.active ? "text.primary" : "transparent",
-									color: p.active
-										? "#fff"
-										: p.disabled
-											? "divider"
-											: "text.secondary",
-									fontSize: 12,
-									fontFamily: MONO,
-									cursor: p.disabled ? "not-allowed" : "pointer",
-									fontVariantNumeric: "tabular-nums",
-									"&:hover": {
-										bgcolor: p.active
-											? "text.primary"
-											: p.disabled
-												? "transparent"
-												: SHELL.bgSoft,
-										color: p.active ? "#fff" : p.disabled ? "divider" : "text.primary",
-									},
-								}}
-							>
-								{p.label}
-							</Box>
-						))}
+						{Array.from({ length: pageCount }, (_, idx) => idx + 1)
+							.filter((p) => Math.abs(p - metaPage) <= 2)
+							.map((p) => (
+								<Box
+									key={p}
+									component="button"
+									onClick={() => setPage(p)}
+									sx={{
+										width: 30,
+										height: 30,
+										borderRadius: "8px",
+										border: "none",
+										bgcolor: p === metaPage ? "text.primary" : "transparent",
+										color: p === metaPage ? "#fff" : "text.secondary",
+										fontSize: 12,
+										fontFamily: MONO,
+										cursor: "pointer",
+										fontVariantNumeric: "tabular-nums",
+										"&:hover": {
+											bgcolor: p === metaPage ? "text.primary" : SHELL.bgSoft,
+											color: p === metaPage ? "#fff" : "text.primary",
+										},
+									}}
+								>
+									{p}
+								</Box>
+							))}
 					</Stack>
 				</Stack>
 			</Box>

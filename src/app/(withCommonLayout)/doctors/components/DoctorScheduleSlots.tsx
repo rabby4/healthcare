@@ -1,131 +1,222 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 import { getTimeIn12HourFormat } from "@/app/(withDashboardLayout)/dashboard/doctor/schedules/components/MultipleSelectFieldChip"
+import { Eyebrow } from "@/components/ui/home/SectionHead"
 import { useCreateAppointmentMutation } from "@/redux/api/appointmentApi"
 import { useGetAllDoctorSchedulesQuery } from "@/redux/api/doctorScheduleApi"
 import { useInitialPaymentMutation } from "@/redux/api/paymentApi"
 import { IDoctorSchedule } from "@/types"
 import { formatDate } from "@/utils/formatDate"
-import { Box, Button, Stack, Typography } from "@mui/material"
+import {
+	Box,
+	Button,
+	Skeleton,
+	Stack,
+	Typography,
+} from "@mui/material"
 import dayjs from "dayjs"
 import utc from "dayjs/plugin/utc"
-import { useRouter } from "next/navigation"
-import { useState } from "react"
+import { useMemo, useState } from "react"
+import { toast } from "sonner"
 dayjs.extend(utc)
 
 const DoctorScheduleSlots = ({ id }: { id: string }) => {
 	const [scheduleId, setScheduleId] = useState("")
-	const router = useRouter()
 
-	const query: Record<string, any> = {}
-
-	query["id"] = id
-
-	query["startDateTime"] = dayjs(new Date())
-		.utc()
-		.hour(0)
-		.minute(0)
-		.second(0)
-		.millisecond(0)
-		.toISOString()
-
-	query["endDateTime"] = dayjs(new Date())
-		.utc()
-		.hour(23)
-		.minute(59)
-		.second(59)
-		.millisecond(999)
-		.toISOString()
-
-	const { data, isLoading } = useGetAllDoctorSchedulesQuery({ ...query })
-
-	const doctorSchedules = data?.doctorSchedules
-
-	const currentDate = new Date()
-	const today = currentDate.toLocaleDateString("en-US", { weekday: "long" })
-
-	const availableSlots = doctorSchedules?.filter(
-		(doctor: IDoctorSchedule) => !doctor.isBooked
+	// BUG FIX: backend filters by `doctorId`, NOT `id`. Passing `id` returned
+	// every doctor's slots. Pass `doctorId` so we only get this doctor's slots.
+	const { data, isLoading } = useGetAllDoctorSchedulesQuery(
+		{ doctorId: id },
+		{ skip: !id }
 	)
 
-	const [createAppointment] = useCreateAppointmentMutation()
-	const [initialPayment] = useInitialPaymentMutation()
+	const doctorSchedules: IDoctorSchedule[] = data?.doctorSchedules ?? []
+
+	// The backend date filter is inert, so filter client-side: keep only slots
+	// that are NOT booked and whose start time is now or in the future.
+	const groupedByDay = useMemo(() => {
+		const now = dayjs()
+		const available = doctorSchedules
+			.filter(
+				(ds) =>
+					!ds.isBooked &&
+					ds?.schedule?.startDateTime &&
+					!dayjs(ds.schedule.startDateTime).isBefore(now)
+			)
+			.sort((a, b) =>
+				dayjs(a.schedule.startDateTime).diff(dayjs(b.schedule.startDateTime))
+			)
+
+		const groups: { date: string; slots: IDoctorSchedule[] }[] = []
+		for (const slot of available) {
+			const dateKey = formatDate(slot.schedule.startDateTime)
+			const existing = groups.find((g) => g.date === dateKey)
+			if (existing) existing.slots.push(slot)
+			else groups.push({ date: dateKey, slots: [slot] })
+		}
+		return groups
+	}, [doctorSchedules])
+
+	const hasSlots = groupedByDay.length > 0
+
+	const [createAppointment, { isLoading: isCreating }] =
+		useCreateAppointmentMutation()
+	const [initialPayment, { isLoading: isPaying }] = useInitialPaymentMutation()
+
+	const isBooking = isCreating || isPaying
 
 	const handleBookAppointment = async () => {
+		if (!id || !scheduleId) return
 		try {
-			if (id && scheduleId) {
-				const res = await createAppointment({
-					doctorId: id,
-					scheduleId,
-				}).unwrap()
-				console.log(res)
-				if (res.id) {
-					const response = await initialPayment(res.id).unwrap()
-					if (response.paymentUrl) {
-						router.push(response.paymentUrl)
-					}
-				}
+			const appt = await createAppointment({
+				doctorId: id,
+				scheduleId,
+			}).unwrap()
+
+			const pay = await initialPayment(appt.id).unwrap()
+			const url = pay?.paymentUrl
+			if (url) {
+				window.location.href = url
+			} else {
+				toast.success("Appointment booked")
 			}
-		} catch (error) {
-			console.log(error)
+		} catch (err: any) {
+			toast.error(
+				err?.data?.message ||
+					err?.message ||
+					"Could not book — please try again"
+			)
 		}
 	}
 
-	return (
-		<Box sx={{ mb: 5 }}>
-			<Box sx={{ bgcolor: "white", p: 3, mt: 1 }}>
-				<Typography variant="h4" sx={{ mb: 3, color: "primary.main" }}>
-					Availability
-				</Typography>
-				<Typography variant="h6" sx={{ fontSize: 16 }}>
-					<b>Today: {formatDate(currentDate.toISOString()) + " " + today}</b>
-				</Typography>
-				<Box sx={{ borderBottom: "2px dashed #d0d0d0", mt: 2, mb: 3 }} />
-				<Stack
-					direction="row"
-					sx={{ alignItems: "center", flexWrap: "wrap", gap: 2 }}
-				>
-					{availableSlots?.length ? (
-						isLoading ? (
-							"Loading..."
-						) : (
-							availableSlots?.map((doctorSchedule: IDoctorSchedule) => {
-								const formattedTimeSlot = `${getTimeIn12HourFormat(
-									doctorSchedule?.schedule?.startDateTime
-								)} - ${getTimeIn12HourFormat(
-									doctorSchedule?.schedule?.endDateTime
-								)}`
+	const dayLabel = (dateKey: string) =>
+		dayjs(dateKey).format("dddd, MMM D")
 
-								return (
-									<Button
-										key={doctorSchedule?.scheduleId}
-										color="primary"
-										onClick={() => setScheduleId(doctorSchedule?.scheduleId)}
-										variant={`${
-											doctorSchedule?.scheduleId === scheduleId
-												? "contained"
-												: "outlined"
-										}`}
-									>
-										{formattedTimeSlot}
-									</Button>
-								)
-							})
-						)
-					) : (
-						<span style={{ color: "red" }}>
-							No Schedule is Available Today!
-						</span>
-					)}
-				</Stack>
+	return (
+		<Box>
+			<Eyebrow>Availability</Eyebrow>
+			<Typography variant="h4" sx={{ color: "text.primary", mb: 1 }}>
+				Book an appointment
+			</Typography>
+			<Typography sx={{ color: "text.secondary", mb: 4, maxWidth: 560 }}>
+				Pick an open time slot below and confirm to proceed to secure payment.
+			</Typography>
+
+			<Box
+				sx={{
+					bgcolor: "#fff",
+					border: "1px solid",
+					borderColor: "divider",
+					borderRadius: "22px",
+					p: { xs: 2.5, md: 4 },
+				}}
+			>
+				{isLoading ? (
+					<Stack sx={{ gap: 2 }}>
+						<Skeleton variant="text" width={160} height={28} />
+						<Stack direction="row" sx={{ flexWrap: "wrap", gap: 1.5 }}>
+							{Array.from({ length: 6 }).map((_, i) => (
+								<Skeleton
+									key={i}
+									variant="rounded"
+									width={150}
+									height={42}
+									sx={{ borderRadius: "999px" }}
+								/>
+							))}
+						</Stack>
+						<Typography sx={{ color: "text.secondary", mt: 1 }}>
+							Loading slots…
+						</Typography>
+					</Stack>
+				) : hasSlots ? (
+					<Stack sx={{ gap: 4 }}>
+						{groupedByDay.map((group) => (
+							<Box key={group.date}>
+								<Typography
+									sx={{
+										fontWeight: 700,
+										color: "text.primary",
+										mb: 1.75,
+										fontSize: 16,
+									}}
+								>
+									{dayLabel(group.date)}
+								</Typography>
+								<Stack
+									direction="row"
+									sx={{ flexWrap: "wrap", gap: 1.25 }}
+								>
+									{group.slots.map((ds) => {
+										const selected = ds.scheduleId === scheduleId
+										const formattedTimeSlot = `${getTimeIn12HourFormat(
+											ds.schedule.startDateTime
+										)} - ${getTimeIn12HourFormat(
+											ds.schedule.endDateTime
+										)}`
+										return (
+											<Button
+												key={ds.scheduleId}
+												onClick={() => setScheduleId(ds.scheduleId)}
+												variant={selected ? "contained" : "outlined"}
+												sx={
+													selected
+														? {
+																bgcolor: "primary.main",
+																color: "#fff",
+																"&:hover": { bgcolor: "primary.dark" },
+														  }
+														: {
+																borderColor: "divider",
+																color: "text.primary",
+																"&:hover": {
+																	borderColor: "primary.main",
+																	bgcolor: "primary.light",
+																},
+														  }
+												}
+											>
+												{formattedTimeSlot}
+											</Button>
+										)
+									})}
+								</Stack>
+							</Box>
+						))}
+					</Stack>
+				) : (
+					<Box sx={{ textAlign: "center", py: { xs: 3, md: 5 } }}>
+						<Typography
+							sx={{ fontWeight: 700, color: "text.primary", fontSize: 17 }}
+						>
+							No available slots right now
+						</Typography>
+						<Typography sx={{ color: "text.secondary", mt: 0.75 }}>
+							Check back soon — new schedules are added regularly.
+						</Typography>
+					</Box>
+				)}
 			</Box>
 
-			<Button
-				onClick={handleBookAppointment}
-				sx={{ display: "block", mx: "auto" }}
-			>
-				Book Appointment Now
-			</Button>
+			{hasSlots && (
+				<Stack sx={{ mt: 3, alignItems: { xs: "stretch", sm: "flex-start" } }}>
+					<Button
+						onClick={handleBookAppointment}
+						disabled={!scheduleId || isBooking}
+						sx={{
+							bgcolor: "primary.main",
+							color: "#fff",
+							py: "12px",
+							px: 4,
+							"&:hover": { bgcolor: "primary.dark" },
+							// Disabled: drop the teal so the muted text stays readable.
+							"&.Mui-disabled": { bgcolor: "#F4F6F8", color: "text.disabled" },
+						}}
+					>
+						{isBooking ? "Booking…" : "Book appointment"}
+					</Button>
+				</Stack>
+			)}
 		</Box>
 	)
 }

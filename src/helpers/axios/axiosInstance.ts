@@ -54,12 +54,13 @@ instance.interceptors.response.use(
 			return instance(config)
 		} else {
 			const responseObject: IGenericErrorResponse = {
-				statusCode: error?.response?.data?.statusCode || 500,
+				statusCode: error?.response?.data?.statusCode || error?.response?.status || 500,
 				message: error?.response?.data?.message || "Something went wrong!!!",
 				errorMessages: error?.response?.data?.message,
 			}
-			// return Promise.reject(error)
-			return responseObject
+			// Reject so RTK Query treats this as an error: queries set isError and
+			// mutations' .unwrap() throws (so try/catch + error toasts actually fire).
+			return Promise.reject(responseObject)
 		}
 	}
 )

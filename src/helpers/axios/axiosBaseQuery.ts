@@ -1,4 +1,4 @@
-import { IMeta } from "@/types"
+import { IGenericErrorResponse, IMeta } from "@/types"
 import type { BaseQueryFn } from "@reduxjs/toolkit/query"
 import type { AxiosRequestConfig, AxiosError } from "axios"
 import { instance as axiosInstance } from "./axiosInstance"
@@ -32,6 +32,21 @@ export const axiosBaseQuery =
 			})
 			return result
 		} catch (axiosError) {
+			// The response interceptor rejects with a normalized
+			// { statusCode, message, errorMessages } object on API errors.
+			const normalized = axiosError as Partial<IGenericErrorResponse>
+			if (
+				normalized &&
+				typeof normalized === "object" &&
+				("statusCode" in normalized || "errorMessages" in normalized)
+			) {
+				return {
+					error: {
+						status: normalized.statusCode,
+						data: normalized,
+					},
+				}
+			}
 			const err = axiosError as AxiosError
 			return {
 				error: {

@@ -17,13 +17,11 @@ const adminTierManage: NavGroup["items"] = [
 		label: "Doctors",
 		href: "/dashboard/doctors",
 		icon: <MedicalServicesOutlinedIcon sx={{ fontSize: 18 }} />,
-		badge: 240,
 	},
 	{
 		label: "Specialties",
 		href: "/dashboard/specialties",
 		icon: <FavoriteBorderRoundedIcon sx={{ fontSize: 18 }} />,
-		badge: 18,
 	},
 	{
 		label: "Schedules",
@@ -72,7 +70,6 @@ export const superAdminNav: NavGroup[] = [
 				label: "Admins",
 				href: "/dashboard/admins",
 				icon: <ShieldOutlinedIcon sx={{ fontSize: 18 }} />,
-				badge: 6,
 			},
 			...adminTierManage,
 		],
@@ -140,6 +137,11 @@ export const patientNav: NavGroup[] = [
 				label: "Appointments",
 				href: "/dashboard/patient/appointments",
 				icon: <CalendarMonthRoundedIcon sx={{ fontSize: 18 }} />,
+			},
+			{
+				label: "Profile & Health",
+				href: "/dashboard/patient/profile",
+				icon: <PersonOutlinedIcon sx={{ fontSize: 18 }} />,
 			},
 		],
 	},

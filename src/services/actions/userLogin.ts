@@ -15,9 +15,11 @@ export const userLogin = async (data: FieldValues) => {
 	)
 	const userInfo = await res.json()
 	if (userInfo?.data?.accessToken) {
-		setAccessToken(userInfo.data.accessToken, {
-			redirect: "/dashboard",
-		})
+		// Await so the auth cookie is committed before the caller navigates —
+		// otherwise the dashboard proxy guard bounces the user back to /login.
+		// Navigation itself is the caller's job (client-side), which is more
+		// reliable than redirect() inside a server action.
+		await setAccessToken(userInfo.data.accessToken)
 	}
 	return userInfo
 }

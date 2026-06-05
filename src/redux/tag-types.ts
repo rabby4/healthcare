@@ -23,4 +23,5 @@ export const tagTypesList = [
 	tagTypes.user,
 	tagTypes.prescription,
 	tagTypes.review,
+	tagTypes.payment,
 ]

@@ -1,11 +1,9 @@
-import React from "react"
+import { redirect } from "next/navigation"
 
-const PatientPage = () => {
-	return (
-		<div>
-			<h1>patient home page</h1>
-		</div>
-	)
+// The patient overview lives at /dashboard (role-branched). This bare
+// /dashboard/patient route is a leftover — redirect it to the real overview.
+const PatientIndex = () => {
+	redirect("/dashboard")
 }
 
-export default PatientPage
+export default PatientIndex

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
 import {
@@ -12,41 +13,17 @@ import {
 	Typography,
 } from "@mui/material"
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded"
-import FavoriteBorderRoundedIcon from "@mui/icons-material/FavoriteBorderRounded"
-import PsychologyRoundedIcon from "@mui/icons-material/PsychologyRounded"
-import RemoveRedEyeOutlinedIcon from "@mui/icons-material/RemoveRedEyeOutlined"
-import ChildCareRoundedIcon from "@mui/icons-material/ChildCareRounded"
-import AirRoundedIcon from "@mui/icons-material/AirRounded"
-import HealthAndSafetyOutlinedIcon from "@mui/icons-material/HealthAndSafetyOutlined"
-import AccessibilityNewRoundedIcon from "@mui/icons-material/AccessibilityNewRounded"
-import AccessTimeRoundedIcon from "@mui/icons-material/AccessTimeRounded"
-import PublicRoundedIcon from "@mui/icons-material/PublicRounded"
-import AddBoxOutlinedIcon from "@mui/icons-material/AddBoxOutlined"
-import ShieldOutlinedIcon from "@mui/icons-material/ShieldOutlined"
-import MedicalServicesOutlinedIcon from "@mui/icons-material/MedicalServicesOutlined"
-import { ComponentType, useState } from "react"
+import CloudUploadOutlinedIcon from "@mui/icons-material/CloudUploadOutlined"
+import { useRef, useState } from "react"
+import { toast } from "sonner"
 
 import { MONO, SHELL } from "@/components/dashboard/shell/tokens"
+import { useCreateSpecialtyMutation } from "@/redux/api/specialtiesApi"
 
 type Props = {
 	open: boolean
 	onClose: () => void
 }
-
-const iconChoices: ComponentType<{ sx?: object }>[] = [
-	FavoriteBorderRoundedIcon,
-	PsychologyRoundedIcon,
-	RemoveRedEyeOutlinedIcon,
-	ChildCareRoundedIcon,
-	AirRoundedIcon,
-	HealthAndSafetyOutlinedIcon,
-	AccessibilityNewRoundedIcon,
-	AccessTimeRoundedIcon,
-	PublicRoundedIcon,
-	AddBoxOutlinedIcon,
-	ShieldOutlinedIcon,
-	MedicalServicesOutlinedIcon,
-]
 
 const FieldLabel = ({ children, sx }: { children: React.ReactNode; sx?: object }) => (
 	<Typography
@@ -63,13 +40,54 @@ const FieldLabel = ({ children, sx }: { children: React.ReactNode; sx?: object }
 )
 
 const AddSpecialtyModal = ({ open, onClose }: Props) => {
-	const [selected, setSelected] = useState(0)
-	const uploadIndex = iconChoices.length // last cell is Upload
+	const [title, setTitle] = useState("")
+	const [file, setFile] = useState<File | null>(null)
+	const [preview, setPreview] = useState<string | null>(null)
+	const fileInputRef = useRef<HTMLInputElement>(null)
+
+	const [createSpecialty, { isLoading }] = useCreateSpecialtyMutation()
+
+	const reset = () => {
+		setTitle("")
+		setFile(null)
+		setPreview(null)
+		if (fileInputRef.current) fileInputRef.current.value = ""
+	}
+
+	const handleClose = () => {
+		reset()
+		onClose()
+	}
+
+	const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const picked = e.target.files?.[0]
+		if (!picked) return
+		setFile(picked)
+		setPreview(URL.createObjectURL(picked))
+	}
+
+	const handleSubmit = async () => {
+		if (!title.trim() || !file) return
+		try {
+			const payload = { title: title.trim() }
+			const fd = new FormData()
+			fd.append("data", JSON.stringify(payload))
+			fd.append("file", file)
+			await createSpecialty(fd).unwrap()
+			toast.success("Specialty added")
+			reset()
+			onClose()
+		} catch (err: any) {
+			toast.error(err?.data?.message || err?.message || "Something went wrong")
+		}
+	}
+
+	const disabled = isLoading || !title.trim() || !file
 
 	return (
 		<Dialog
 			open={open}
-			onClose={onClose}
+			onClose={handleClose}
 			fullWidth
 			maxWidth="sm"
 			slotProps={{
@@ -97,11 +115,11 @@ const AddSpecialtyModal = ({ open, onClose }: Props) => {
 						Add a specialty
 					</Typography>
 					<Typography sx={{ fontSize: 13, color: "text.secondary", mt: 0.5 }}>
-						Pick an icon and give it a clear, patient-friendly name.
+						Upload an icon and give it a clear, patient-friendly name.
 					</Typography>
 				</Box>
 				<IconButton
-					onClick={onClose}
+					onClick={handleClose}
 					size="small"
 					sx={{
 						color: "text.secondary",
@@ -114,84 +132,85 @@ const AddSpecialtyModal = ({ open, onClose }: Props) => {
 
 			<DialogContent sx={{ p: 3 }}>
 				<FieldLabel>Specialty name</FieldLabel>
-				<TextField placeholder="e.g. Endocrinology" fullWidth size="small" />
+				<TextField
+					placeholder="e.g. Endocrinology"
+					fullWidth
+					size="small"
+					value={title}
+					onChange={(e) => setTitle(e.target.value)}
+				/>
 
-				<FieldLabel sx={{ mt: 2, mb: 1 }}>Choose an icon</FieldLabel>
-				<Box
-					sx={{
-						display: "grid",
-						gridTemplateColumns: "repeat(6, 1fr)",
-						gap: "8px",
-					}}
-				>
-					{iconChoices.map((Icon, i) => {
-						const on = selected === i
-						return (
-							<Box
-								key={i}
-								onClick={() => setSelected(i)}
-								sx={{
-									aspectRatio: "1 / 1",
-									display: "flex",
-									alignItems: "center",
-									justifyContent: "center",
-									border: "1px solid",
-									borderColor: on ? "primary.main" : "divider",
-									bgcolor: on ? "primary.light" : "#fff",
-									color: on ? "primary.main" : "text.secondary",
-									borderRadius: "12px",
-									cursor: "pointer",
-									transition: "all 140ms ease",
-									"&:hover": {
-										borderColor: on ? "primary.main" : "text.primary",
-										color: on ? "primary.main" : "text.primary",
-									},
-								}}
-							>
-								<Icon sx={{ fontSize: 22 }} />
-							</Box>
-						)
-					})}
+				<FieldLabel sx={{ mt: 2, mb: 1 }}>Icon</FieldLabel>
 
-					{/* Upload cell */}
+				<input
+					ref={fileInputRef}
+					type="file"
+					accept="image/*"
+					hidden
+					onChange={handleFileChange}
+				/>
+
+				<Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+					{/* Preview */}
 					<Box
-						onClick={() => setSelected(uploadIndex)}
 						sx={{
-							aspectRatio: "1 / 1",
+							width: 56,
+							height: 56,
+							flexShrink: 0,
+							borderRadius: "14px",
+							border: "1px solid",
+							borderColor: preview ? "primary.main" : "divider",
+							bgcolor: preview ? "primary.light" : "#fff",
+							color: "text.secondary",
 							display: "flex",
 							alignItems: "center",
 							justifyContent: "center",
-							border: "1px solid",
-							borderColor: selected === uploadIndex ? "primary.main" : "divider",
-							bgcolor: selected === uploadIndex ? "primary.light" : "#fff",
-							color:
-								selected === uploadIndex ? "primary.main" : "text.secondary",
-							borderRadius: "12px",
-							cursor: "pointer",
-							fontFamily: MONO,
-							fontSize: 11,
-							transition: "all 140ms ease",
-							"&:hover": {
-								borderColor:
-									selected === uploadIndex ? "primary.main" : "text.primary",
-								color:
-									selected === uploadIndex ? "primary.main" : "text.primary",
-							},
+							overflow: "hidden",
 						}}
 					>
-						Upload
+						{preview ? (
+							<Box
+								component="img"
+								src={preview}
+								alt="icon preview"
+								sx={{ width: 36, height: 36, objectFit: "contain" }}
+							/>
+						) : (
+							<CloudUploadOutlinedIcon sx={{ fontSize: 22 }} />
+						)}
+					</Box>
+
+					<Box sx={{ minWidth: 0 }}>
+						<Button
+							onClick={() => fileInputRef.current?.click()}
+							variant="outlined"
+							size="small"
+							startIcon={<CloudUploadOutlinedIcon sx={{ fontSize: 18 }} />}
+							sx={{
+								bgcolor: "#fff",
+								color: "text.primary",
+								borderColor: "divider",
+								"&:hover": { borderColor: "text.primary", bgcolor: SHELL.bgSoft },
+							}}
+						>
+							{file ? "Change icon" : "Upload icon"}
+						</Button>
+						<Typography
+							sx={{
+								mt: 0.75,
+								fontSize: 11,
+								color: "text.secondary",
+								fontFamily: MONO,
+								whiteSpace: "nowrap",
+								overflow: "hidden",
+								textOverflow: "ellipsis",
+								maxWidth: 260,
+							}}
+						>
+							{file ? file.name : "SVG/PNG · Recommended 48×48"}
+						</Typography>
 					</Box>
 				</Box>
-
-				<Typography
-					sx={{
-						mt: "10px",
-						fontSize: 11,
-						color: "text.secondary",
-					}}
-				>
-					Or upload a custom SVG/PNG via Cloudinary. Recommended 48×48.
-				</Typography>
 			</DialogContent>
 
 			<DialogActions
@@ -205,7 +224,7 @@ const AddSpecialtyModal = ({ open, onClose }: Props) => {
 				}}
 			>
 				<Button
-					onClick={onClose}
+					onClick={handleClose}
 					variant="outlined"
 					sx={{
 						bgcolor: "#fff",
@@ -216,7 +235,9 @@ const AddSpecialtyModal = ({ open, onClose }: Props) => {
 				>
 					Cancel
 				</Button>
-				<Button onClick={onClose}>Add specialty</Button>
+				<Button onClick={handleSubmit} disabled={disabled}>
+					{isLoading ? "Adding…" : "Add specialty"}
+				</Button>
 			</DialogActions>
 		</Dialog>
 	)

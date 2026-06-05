@@ -150,18 +150,6 @@ const Topbar = ({ roleVariant, userInitials, userName }: Props) => {
 					}}
 				>
 					<NotificationsNoneRoundedIcon sx={{ fontSize: 20 }} />
-					<Box
-						sx={{
-							position: "absolute",
-							top: 8,
-							right: 8,
-							width: 7,
-							height: 7,
-							borderRadius: "50%",
-							bgcolor: SHELL.urgent,
-							boxShadow: "0 0 0 2px #fff",
-						}}
-					/>
 				</Box>
 
 				<Stack

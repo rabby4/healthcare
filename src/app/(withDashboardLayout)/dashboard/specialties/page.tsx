@@ -1,156 +1,213 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
-import { Box, Button, IconButton, Stack, Typography } from "@mui/material"
+import { Box, Button, IconButton, Menu, MenuItem, Skeleton, Typography } from "@mui/material"
 import AddRoundedIcon from "@mui/icons-material/AddRounded"
 import MoreHorizRoundedIcon from "@mui/icons-material/MoreHorizRounded"
-import FavoriteBorderRoundedIcon from "@mui/icons-material/FavoriteBorderRounded"
-import PsychologyRoundedIcon from "@mui/icons-material/PsychologyRounded"
-import ChildCareRoundedIcon from "@mui/icons-material/ChildCareRounded"
-import RemoveRedEyeOutlinedIcon from "@mui/icons-material/RemoveRedEyeOutlined"
-import MedicalServicesOutlinedIcon from "@mui/icons-material/MedicalServicesOutlined"
-import AirRoundedIcon from "@mui/icons-material/AirRounded"
-import HealthAndSafetyOutlinedIcon from "@mui/icons-material/HealthAndSafetyOutlined"
-import AccessibilityNewRoundedIcon from "@mui/icons-material/AccessibilityNewRounded"
-import { ComponentType, useState } from "react"
+import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded"
+import { useState } from "react"
+import { toast } from "sonner"
 
 import PageHead from "@/components/dashboard/shell/PageHead"
-import { MONO, SHELL } from "@/components/dashboard/shell/tokens"
+import { SHELL } from "@/components/dashboard/shell/tokens"
+import {
+	useDeleteSpecialtyMutation,
+	useGetAllSpecialtiesQuery,
+} from "@/redux/api/specialtiesApi"
 import AddSpecialtyModal from "./AddSpecialtyModal"
 
-type Specialty = {
-	name: string
-	Icon: ComponentType<{ sx?: object }>
-	count: string
+type ISpecialty = {
+	id: string
+	title: string
+	icon: string
 }
 
-const specialties: Specialty[] = [
-	{ name: "Cardiology", Icon: FavoriteBorderRoundedIcon, count: "48 doctors" },
-	{ name: "Neurology", Icon: PsychologyRoundedIcon, count: "32 doctors" },
-	{ name: "Pediatrics", Icon: ChildCareRoundedIcon, count: "29 doctors" },
-	{ name: "Ophthalmology", Icon: RemoveRedEyeOutlinedIcon, count: "21 doctors" },
-	{ name: "Dental", Icon: MedicalServicesOutlinedIcon, count: "36 doctors" },
-	{ name: "Pulmonology", Icon: AirRoundedIcon, count: "18 doctors" },
-	{ name: "General Medicine", Icon: HealthAndSafetyOutlinedIcon, count: "54 doctors" },
-	{ name: "Orthopedics", Icon: AccessibilityNewRoundedIcon, count: "22 doctors" },
-]
+const GRID_SX = {
+	display: "grid",
+	gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
+	gap: 2,
+} as const
 
 const SpecialtiesPage = () => {
 	const [addOpen, setAddOpen] = useState(false)
+	const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null)
+	const [activeId, setActiveId] = useState<string | null>(null)
+
+	const { data, isLoading, isError } = useGetAllSpecialtiesQuery(undefined)
+	const specialties: ISpecialty[] = (data as ISpecialty[]) ?? []
+
+	const [deleteSpecialty] = useDeleteSpecialtyMutation()
+
+	const openMenu = (e: React.MouseEvent<HTMLElement>, id: string) => {
+		setMenuAnchor(e.currentTarget)
+		setActiveId(id)
+	}
+	const closeMenu = () => {
+		setMenuAnchor(null)
+		setActiveId(null)
+	}
+
+	const handleDelete = async () => {
+		const id = activeId
+		closeMenu()
+		if (!id) return
+		if (!window.confirm("Are you sure?")) return
+		try {
+			await deleteSpecialty(id).unwrap()
+			toast.success("Specialty deleted")
+		} catch {
+			toast.error("Cannot delete — specialty is in use by a doctor")
+		}
+	}
+
+	const subtitle = isLoading
+		? "Loading specialties…"
+		: `${specialties.length} specialties · Each has an icon patients see when browsing.`
 
 	return (
 		<>
 			<PageHead
 				title="Specialties"
-				subtitle="18 specialties · Each has an icon patients see when browsing."
+				subtitle={subtitle}
 				actions={<Button onClick={() => setAddOpen(true)}>+ Add specialty</Button>}
 			/>
 
-			<Box
-				sx={{
-					display: "grid",
-					gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
-					gap: 2,
-				}}
-			>
-				{/* Add specialty (dashed) card */}
-				<Box
-					onClick={() => setAddOpen(true)}
-					sx={{
-						minHeight: 168,
-						display: "flex",
-						flexDirection: "column",
-						alignItems: "center",
-						justifyContent: "center",
-						gap: 1,
-						p: "22px",
-						border: "1.5px dashed",
-						borderColor: "divider",
-						borderRadius: "22px",
-						color: "text.secondary",
-						cursor: "pointer",
-						transition: "all 160ms ease",
-						bgcolor: "transparent",
-						"&:hover": {
-							borderColor: "primary.main",
-							bgcolor: SHELL.tealTint2,
-							color: "primary.main",
-						},
-					}}
-				>
-					<AddRoundedIcon sx={{ fontSize: 28 }} />
-					<Typography sx={{ fontSize: 13, fontWeight: 600 }}>Add specialty</Typography>
+			{isError ? (
+				<Typography sx={{ fontSize: 14, color: SHELL.urgent, py: 4 }}>
+					Failed to load specialties. Please try again.
+				</Typography>
+			) : (
+				<Box sx={GRID_SX}>
+					{/* Add specialty (dashed) card */}
+					<Box
+						onClick={() => setAddOpen(true)}
+						sx={{
+							minHeight: 168,
+							display: "flex",
+							flexDirection: "column",
+							alignItems: "center",
+							justifyContent: "center",
+							gap: 1,
+							p: "22px",
+							border: "1.5px dashed",
+							borderColor: "divider",
+							borderRadius: "22px",
+							color: "text.secondary",
+							cursor: "pointer",
+							transition: "all 160ms ease",
+							bgcolor: "transparent",
+							"&:hover": {
+								borderColor: "primary.main",
+								bgcolor: SHELL.tealTint2,
+								color: "primary.main",
+							},
+						}}
+					>
+						<AddRoundedIcon sx={{ fontSize: 28 }} />
+						<Typography sx={{ fontSize: 13, fontWeight: 600 }}>Add specialty</Typography>
+					</Box>
+
+					{isLoading
+						? Array.from({ length: 6 }).map((_, i) => (
+								<Box
+									key={i}
+									sx={{
+										minHeight: 168,
+										bgcolor: "#fff",
+										border: "1px solid",
+										borderColor: "divider",
+										borderRadius: "22px",
+										p: "22px",
+									}}
+								>
+									<Skeleton
+										variant="rounded"
+										width={48}
+										height={48}
+										sx={{ borderRadius: "14px", mb: 1.75 }}
+									/>
+									<Skeleton variant="text" width="70%" height={24} />
+								</Box>
+						  ))
+						: specialties.map((s) => (
+								<Box
+									key={s.id}
+									sx={{
+										position: "relative",
+										bgcolor: "#fff",
+										border: "1px solid",
+										borderColor: "divider",
+										borderRadius: "22px",
+										p: "22px",
+										minHeight: 168,
+										transition: "all 160ms ease",
+										"&:hover": {
+											borderColor: "primary.main",
+											boxShadow: "0 10px 28px -16px rgba(14, 124, 123, 0.35)",
+										},
+									}}
+								>
+									<IconButton
+										size="small"
+										onClick={(e) => openMenu(e, s.id)}
+										sx={{
+											position: "absolute",
+											top: 16,
+											right: 16,
+											width: 28,
+											height: 28,
+											borderRadius: "8px",
+											color: "text.secondary",
+											"&:hover": { bgcolor: SHELL.bgSoft, color: "text.primary" },
+										}}
+									>
+										<MoreHorizRoundedIcon sx={{ fontSize: 16 }} />
+									</IconButton>
+
+									<Box
+										sx={{
+											width: 48,
+											height: 48,
+											borderRadius: "14px",
+											bgcolor: "primary.light",
+											color: "primary.main",
+											display: "inline-flex",
+											alignItems: "center",
+											justifyContent: "center",
+											mb: 1.75,
+											overflow: "hidden",
+										}}
+									>
+										<Box
+											component="img"
+											src={s.icon}
+											alt={s.title}
+											sx={{ width: 32, height: 32, objectFit: "contain" }}
+										/>
+									</Box>
+
+									<Typography
+										sx={{ fontSize: 16, fontWeight: 600, color: "text.primary" }}
+									>
+										{s.title}
+									</Typography>
+								</Box>
+						  ))}
 				</Box>
+			)}
 
-				{specialties.map((s) => {
-					const Icon = s.Icon
-					return (
-						<Box
-							key={s.name}
-							sx={{
-								position: "relative",
-								bgcolor: "#fff",
-								border: "1px solid",
-								borderColor: "divider",
-								borderRadius: "22px",
-								p: "22px",
-								transition: "all 160ms ease",
-								"&:hover": {
-									borderColor: "primary.main",
-									boxShadow: "0 10px 28px -16px rgba(14, 124, 123, 0.35)",
-								},
-							}}
-						>
-							<IconButton
-								size="small"
-								sx={{
-									position: "absolute",
-									top: 16,
-									right: 16,
-									width: 28,
-									height: 28,
-									borderRadius: "8px",
-									color: "text.secondary",
-									"&:hover": { bgcolor: SHELL.bgSoft, color: "text.primary" },
-								}}
-							>
-								<MoreHorizRoundedIcon sx={{ fontSize: 16 }} />
-							</IconButton>
-
-							<Box
-								sx={{
-									width: 48,
-									height: 48,
-									borderRadius: "14px",
-									bgcolor: "primary.light",
-									color: "primary.main",
-									display: "inline-flex",
-									alignItems: "center",
-									justifyContent: "center",
-									mb: 1.75,
-								}}
-							>
-								<Icon sx={{ fontSize: 24 }} />
-							</Box>
-
-							<Typography sx={{ fontSize: 16, fontWeight: 600, color: "text.primary" }}>
-								{s.name}
-							</Typography>
-							<Typography
-								sx={{
-									mt: 0.5,
-									fontSize: 12,
-									color: "text.secondary",
-									fontFamily: MONO,
-									textTransform: "uppercase",
-									letterSpacing: "0.04em",
-								}}
-							>
-								{s.count}
-							</Typography>
-						</Box>
-					)
-				})}
-			</Box>
+			<Menu
+				anchorEl={menuAnchor}
+				open={Boolean(menuAnchor)}
+				onClose={closeMenu}
+				anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+				transformOrigin={{ vertical: "top", horizontal: "right" }}
+			>
+				<MenuItem onClick={handleDelete} sx={{ color: SHELL.urgent, fontSize: 13, gap: 1 }}>
+					<DeleteOutlineRoundedIcon sx={{ fontSize: 18 }} />
+					Delete
+				</MenuItem>
+			</Menu>
 
 			<AddSpecialtyModal open={addOpen} onClose={() => setAddOpen(false)} />
 		</>

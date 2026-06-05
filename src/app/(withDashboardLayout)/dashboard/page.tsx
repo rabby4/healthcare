@@ -2,10 +2,9 @@
 import { jwtDecode } from "jwt-decode"
 import { cookies } from "next/headers"
 
-import AdminOverview from "./_views/AdminOverview"
 import DoctorOverview from "./_views/DoctorOverview"
+import Overview from "./_views/Overview"
 import PatientOverview from "./_views/PatientOverview"
-import SuperAdminOverview from "./_views/SuperAdminOverview"
 
 const DashboardPage = async () => {
 	const cookie = await cookies()
@@ -17,8 +16,10 @@ const DashboardPage = async () => {
 		} catch {}
 	}
 
-	if (role === "SUPER_ADMIN") return <SuperAdminOverview />
-	if (role === "ADMIN") return <AdminOverview />
+	// Admins and super admins share the same overview; the component itself
+	// gates the super-admin-only bits (create admin, seeing super-admin info).
+	if (role === "SUPER_ADMIN") return <Overview role="SUPER_ADMIN" />
+	if (role === "ADMIN") return <Overview role="ADMIN" />
 	if (role === "DOCTOR") return <DoctorOverview />
 	if (role === "PATIENT") return <PatientOverview />
 	return null

@@ -1,8 +1,9 @@
 "use client"
 
-import { Box, Button, Stack, Typography } from "@mui/material"
+import { Box, Button, Chip, Stack, Typography } from "@mui/material"
 import KeyboardArrowDownRoundedIcon from "@mui/icons-material/KeyboardArrowDownRounded"
 import StarRoundedIcon from "@mui/icons-material/StarRounded"
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined"
 
 import AvatarGradient from "@/components/dashboard/shell/AvatarGradient"
 import PageHead from "@/components/dashboard/shell/PageHead"
@@ -212,6 +213,47 @@ const ReviewsPage = () => {
 				}
 			/>
 
+			{/* Info banner — review moderation not yet supported */}
+			<Stack
+				direction="row"
+				sx={{
+					mb: 2.5,
+					gap: 1.5,
+					p: 2,
+					borderRadius: "16px",
+					bgcolor: "#E6F0FA",
+					border: "1px solid #C4D8EC",
+					color: "#1E4D7F",
+				}}
+			>
+				<Box
+					sx={{
+						width: 32,
+						height: 32,
+						borderRadius: "10px",
+						bgcolor: "rgba(42, 111, 181, 0.15)",
+						color: SHELL.info,
+						display: "inline-flex",
+						alignItems: "center",
+						justifyContent: "center",
+						flexShrink: 0,
+					}}
+				>
+					<InfoOutlinedIcon sx={{ fontSize: 16 }} />
+				</Box>
+				<Box>
+					<Typography sx={{ fontSize: 13, fontWeight: 600, color: "#1E4D7F" }}>
+						Review moderation isn&apos;t available yet
+					</Typography>
+					<Typography sx={{ fontSize: 12, mt: 0.5, color: "#1E4D7F" }}>
+						The backend currently supports review creation only (patients can
+						post reviews after a visit). Listing and moderating reviews requires
+						new API endpoints (GET /review and DELETE/PATCH). The cards below are
+						an illustrative preview.
+					</Typography>
+				</Box>
+			</Stack>
+
 			{/* Filter pills */}
 			<Stack
 				direction="row"
@@ -257,6 +299,31 @@ const ReviewsPage = () => {
 						</Box>
 					</Stack>
 				))}
+			</Stack>
+
+			{/* Section label + preview chip */}
+			<Stack
+				direction="row"
+				sx={{ alignItems: "center", gap: 1, mb: 1.5 }}
+			>
+				<Typography
+					sx={{ fontSize: 13, fontWeight: 600, color: "text.secondary" }}
+				>
+					Illustrative preview — not live data
+				</Typography>
+				<Chip
+					label="Preview"
+					size="small"
+					sx={{
+						height: 22,
+						fontSize: 11,
+						fontWeight: 600,
+						bgcolor: "#E6F0FA",
+						color: "#1E4D7F",
+						border: "1px solid #C4D8EC",
+						"& .MuiChip-label": { px: 1 },
+					}}
+				/>
 			</Stack>
 
 			{/* Reviews grid */}
@@ -358,9 +425,15 @@ const ReviewsPage = () => {
 									<Button
 										key={a.label}
 										variant={a.kind === "danger" ? "contained" : "outlined"}
+										disabled
 										sx={{
 											...actionButtonSx(a.kind),
 											...(isLight ? { ml: "auto" } : {}),
+											"&.Mui-disabled": {
+												opacity: 0.5,
+												cursor: "not-allowed",
+												pointerEvents: "auto",
+											},
 										}}
 									>
 										{a.label}
@@ -384,6 +457,7 @@ const ReviewsPage = () => {
 			>
 				<Button
 					variant="outlined"
+					disabled
 					sx={{
 						bgcolor: "#fff",
 						color: "text.primary",
@@ -398,6 +472,7 @@ const ReviewsPage = () => {
 							borderColor: "text.primary",
 							bgcolor: SHELL.bgSoft,
 						},
+						"&.Mui-disabled": { opacity: 0.5 },
 					}}
 				>
 					Load more reviews

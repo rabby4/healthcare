@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
 import {
@@ -15,8 +16,10 @@ import {
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded"
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined"
 import { useState } from "react"
+import { toast } from "sonner"
 
 import { SHELL } from "@/components/dashboard/shell/tokens"
+import { useCreateAdminMutation } from "@/redux/api/adminApi"
 
 type Props = {
 	open: boolean
@@ -24,12 +27,65 @@ type Props = {
 }
 
 const InviteAdminModal = ({ open, onClose }: Props) => {
-	const [role, setRole] = useState<"admin" | "super">("admin")
+	const [name, setName] = useState("")
+	const [email, setEmail] = useState("")
+	const [contactNumber, setContactNumber] = useState("")
+	const [password, setPassword] = useState("")
+	const [file, setFile] = useState<File | null>(null)
+
+	const [createAdmin, { isLoading }] = useCreateAdminMutation()
+
+	const resetFields = () => {
+		setName("")
+		setEmail("")
+		setContactNumber("")
+		setPassword("")
+		setFile(null)
+	}
+
+	const handleClose = () => {
+		if (isLoading) return
+		resetFields()
+		onClose()
+	}
+
+	const handleSubmit = async () => {
+		if (!name.trim() || !email.trim() || !contactNumber.trim()) {
+			toast.error("Name, email and contact number are required")
+			return
+		}
+		if (password.length < 6) {
+			toast.error("Password must be at least 6 characters")
+			return
+		}
+
+		const payload = {
+			password,
+			admin: {
+				name: name.trim(),
+				email: email.trim(),
+				contactNumber: contactNumber.trim(),
+			},
+		}
+
+		const fd = new FormData()
+		fd.append("data", JSON.stringify(payload))
+		if (file) fd.append("file", file)
+
+		try {
+			await createAdmin(fd).unwrap()
+			toast.success("Admin invited")
+			resetFields()
+			onClose()
+		} catch (err: any) {
+			toast.error(err?.data?.message || err?.message || "Something went wrong")
+		}
+	}
 
 	return (
 		<Dialog
 			open={open}
-			onClose={onClose}
+			onClose={handleClose}
 			fullWidth
 			maxWidth="sm"
 			slotProps={{
@@ -57,11 +113,11 @@ const InviteAdminModal = ({ open, onClose }: Props) => {
 						Invite an admin
 					</Typography>
 					<Typography sx={{ fontSize: 13, color: "text.secondary", mt: 0.5 }}>
-						They&apos;ll get an email invite and set their password on first login.
+						Create an admin account with a temporary password they can change later.
 					</Typography>
 				</Box>
 				<IconButton
-					onClick={onClose}
+					onClick={handleClose}
 					size="small"
 					sx={{ color: "text.secondary", "&:hover": { color: "text.primary", bgcolor: SHELL.bgSoft } }}
 				>
@@ -76,7 +132,13 @@ const InviteAdminModal = ({ open, onClose }: Props) => {
 						>
 							Full name
 						</Typography>
-						<TextField placeholder="Full name" fullWidth size="small" />
+						<TextField
+							placeholder="Full name"
+							fullWidth
+							size="small"
+							value={name}
+							onChange={(e) => setName(e.target.value)}
+						/>
 					</Box>
 					<Box>
 						<Typography
@@ -84,47 +146,77 @@ const InviteAdminModal = ({ open, onClose }: Props) => {
 						>
 							Email
 						</Typography>
-						<TextField placeholder="name@medicare.app" fullWidth size="small" />
+						<TextField
+							placeholder="name@medicare.app"
+							type="email"
+							fullWidth
+							size="small"
+							value={email}
+							onChange={(e) => setEmail(e.target.value)}
+						/>
+					</Box>
+					<Box>
+						<Typography
+							sx={{ fontSize: 12, fontWeight: 600, color: "text.secondary", mb: 0.75 }}
+						>
+							Contact number
+						</Typography>
+						<TextField
+							placeholder="+8801XXXXXXXXX"
+							fullWidth
+							size="small"
+							value={contactNumber}
+							onChange={(e) => setContactNumber(e.target.value)}
+						/>
+					</Box>
+					<Box>
+						<Typography
+							sx={{ fontSize: 12, fontWeight: 600, color: "text.secondary", mb: 0.75 }}
+						>
+							Password
+						</Typography>
+						<TextField
+							placeholder="Min 6 characters"
+							type="password"
+							fullWidth
+							size="small"
+							value={password}
+							onChange={(e) => setPassword(e.target.value)}
+						/>
 					</Box>
 				</Box>
 
 				<Typography
-					sx={{ fontSize: 12, fontWeight: 600, color: "text.secondary", mt: 2.25, mb: 1 }}
+					sx={{ fontSize: 12, fontWeight: 600, color: "text.secondary", mt: 2.25, mb: 0.75 }}
 				>
-					Role
+					Profile photo (optional)
 				</Typography>
-				<Stack direction="row" sx={{ gap: 1 }}>
-					{[
-						{ key: "admin", label: "Admin" },
-						{ key: "super", label: "Super Admin" },
-					].map((r) => {
-						const on = role === r.key
-						return (
-							<Box
-								key={r.key}
-								onClick={() => setRole(r.key as "admin" | "super")}
-								sx={{
-									flex: 1,
-									justifyContent: "center",
-									textAlign: "center",
-									py: 1.25,
-									borderRadius: "8px",
-									border: "1px solid",
-									borderColor: on ? "primary.main" : "divider",
-									bgcolor: on ? "primary.light" : "#fff",
-									color: on ? "primary.main" : "text.primary",
-									fontWeight: on ? 600 : 500,
-									fontSize: 13,
-									cursor: "pointer",
-									transition: "all 140ms",
-									"&:hover": { borderColor: on ? "primary.main" : "text.primary" },
-								}}
-							>
-								{r.label}
-							</Box>
-						)
-					})}
-				</Stack>
+				<Box
+					component="input"
+					type="file"
+					accept="image/*"
+					onChange={(e) => {
+						const target = e.target as HTMLInputElement
+						setFile(target.files?.[0] ?? null)
+					}}
+					sx={{
+						width: "100%",
+						fontSize: 13,
+						color: "text.secondary",
+						"&::file-selector-button": {
+							mr: 1.5,
+							px: 1.5,
+							py: 0.75,
+							borderRadius: "8px",
+							border: "1px solid",
+							borderColor: "divider",
+							bgcolor: "#fff",
+							color: "text.primary",
+							fontSize: 13,
+							cursor: "pointer",
+						},
+					}}
+				/>
 
 				<Stack
 					direction="row"
@@ -158,7 +250,7 @@ const InviteAdminModal = ({ open, onClose }: Props) => {
 							Admins can manage the catalog & users
 						</Typography>
 						<Typography sx={{ fontSize: 12, mt: 0.5, color: "#1E4D7F" }}>
-							Super Admins additionally manage other admins. Promote later anytime.
+							New accounts are created with the Admin role. Share the password securely.
 						</Typography>
 					</Box>
 				</Stack>
@@ -167,8 +259,9 @@ const InviteAdminModal = ({ open, onClose }: Props) => {
 				sx={{ p: 2, px: 3, bgcolor: SHELL.bgSoft, borderTop: "1px solid", borderColor: "divider", gap: 1.25 }}
 			>
 				<Button
-					onClick={onClose}
+					onClick={handleClose}
 					variant="outlined"
+					disabled={isLoading}
 					sx={{
 						bgcolor: "#fff",
 						color: "text.primary",
@@ -178,7 +271,9 @@ const InviteAdminModal = ({ open, onClose }: Props) => {
 				>
 					Cancel
 				</Button>
-				<Button onClick={onClose}>Send invite</Button>
+				<Button onClick={handleSubmit} disabled={isLoading}>
+					{isLoading ? "Inviting…" : "Send invite"}
+				</Button>
 			</DialogActions>
 		</Dialog>
 	)

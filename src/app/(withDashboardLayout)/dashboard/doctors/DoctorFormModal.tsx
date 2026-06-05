@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
 import {
@@ -8,23 +9,60 @@ import {
 	DialogContent,
 	DialogTitle,
 	IconButton,
+	MenuItem,
 	Stack,
 	TextField,
 	Typography,
 } from "@mui/material"
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded"
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import { toast } from "sonner"
 
 import { MONO, SHELL } from "@/components/dashboard/shell/tokens"
+import {
+	useCreateDoctorMutation,
+	useUpdateDoctorMutation,
+} from "@/redux/api/doctorApi"
+import { useGetAllSpecialtiesQuery } from "@/redux/api/specialtiesApi"
+import { IDoctor, ISpecialty } from "@/types"
 
 type Props = {
 	open: boolean
 	onClose: () => void
+	doctor?: IDoctor
 }
 
-type Gender = "Female" | "Male" | "Other"
+type Gender = "MALE" | "FEMALE"
 
-const genders: Gender[] = ["Female", "Male", "Other"]
+const genders: Gender[] = ["FEMALE", "MALE"]
+
+type FormState = {
+	name: string
+	email: string
+	password: string
+	contactNumber: string
+	address: string
+	registrationNumber: string
+	experience: string
+	appointmentFee: string
+	qualification: string
+	currentWorkingPlace: string
+	designation: string
+}
+
+const emptyForm: FormState = {
+	name: "",
+	email: "",
+	password: "",
+	contactNumber: "",
+	address: "",
+	registrationNumber: "",
+	experience: "",
+	appointmentFee: "",
+	qualification: "",
+	currentWorkingPlace: "",
+	designation: "",
+}
 
 const FieldLabel = ({ children }: { children: React.ReactNode }) => (
 	<Typography
@@ -54,17 +92,149 @@ const inputSx = {
 	},
 }
 
-const DoctorFormModal = ({ open, onClose }: Props) => {
-	const [gender, setGender] = useState<Gender>("Female")
-	const [specialties, setSpecialties] = useState<string[]>(["Cardiology"])
+const DoctorFormModal = ({ open, onClose, doctor }: Props) => {
+	const isEdit = Boolean(doctor)
 
-	const removeSpecialty = (s: string) =>
-		setSpecialties((prev) => prev.filter((x) => x !== s))
+	const [form, setForm] = useState<FormState>(emptyForm)
+	const [gender, setGender] = useState<Gender>("FEMALE")
+	const [selected, setSelected] = useState<string[]>([])
+	const [file, setFile] = useState<File | null>(null)
+
+	const { data: specialties = [], isLoading: specialtiesLoading } =
+		useGetAllSpecialtiesQuery(undefined)
+	const [createDoctor, { isLoading: isCreating }] = useCreateDoctorMutation()
+	const [updateDoctor, { isLoading: isUpdating }] = useUpdateDoctorMutation()
+
+	const isLoading = isCreating || isUpdating
+
+	// Original specialty ids on the doctor (for diffing in edit mode)
+	const originalSpecialtyIds: string[] =
+		doctor?.doctorSpecialties
+			?.map((ds) => ds.specialties?.id ?? ds.specialtiesId)
+			.filter(Boolean) ?? []
+
+	useEffect(() => {
+		if (!open) return
+		if (doctor) {
+			setForm({
+				name: doctor.name ?? "",
+				email: doctor.email ?? "",
+				password: "",
+				contactNumber: doctor.contactNumber ?? "",
+				address: doctor.address ?? "",
+				registrationNumber: doctor.registrationNumber ?? "",
+				experience:
+					doctor.experience != null ? String(doctor.experience) : "",
+				appointmentFee:
+					doctor.appointmentFee != null ? String(doctor.appointmentFee) : "",
+				qualification: doctor.qualification ?? "",
+				currentWorkingPlace: doctor.currentWorkingPlace ?? "",
+				designation: doctor.designation ?? "",
+			})
+			setGender(doctor.gender === "MALE" ? "MALE" : "FEMALE")
+			setSelected(
+				doctor.doctorSpecialties
+					?.map((ds) => ds.specialties?.id ?? ds.specialtiesId)
+					.filter(Boolean) ?? []
+			)
+		} else {
+			setForm(emptyForm)
+			setGender("FEMALE")
+			setSelected([])
+		}
+		setFile(null)
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [open, doctor?.id])
+
+	const setField = (key: keyof FormState) => (value: string) =>
+		setForm((prev) => ({ ...prev, [key]: value }))
+
+	const toggleSpecialty = (id: string) =>
+		setSelected((prev) =>
+			prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+		)
+
+	const handleClose = () => {
+		if (isLoading) return
+		onClose()
+	}
+
+	const validate = () => {
+		if (!form.name.trim()) return "Full name is required"
+		if (!form.email.trim()) return "Email is required"
+		if (!isEdit && form.password.trim().length < 6)
+			return "Password must be at least 6 characters"
+		if (!form.registrationNumber.trim())
+			return "Registration number is required"
+		return null
+	}
+
+	const handleSubmit = async () => {
+		const error = validate()
+		if (error) {
+			toast.error(error)
+			return
+		}
+
+		try {
+			if (isEdit && doctor) {
+				// Diff specialties: newly selected -> add; removed -> isDeleted true
+				const added = selected
+					.filter((id) => !originalSpecialtyIds.includes(id))
+					.map((specialtiesId) => ({ specialtiesId, isDeleted: false }))
+				const removed = originalSpecialtyIds
+					.filter((id) => !selected.includes(id))
+					.map((specialtiesId) => ({ specialtiesId, isDeleted: true }))
+
+				const body = {
+					name: form.name,
+					contactNumber: form.contactNumber,
+					address: form.address,
+					experience: Number(form.experience),
+					appointmentFee: Number(form.appointmentFee),
+					qualification: form.qualification,
+					currentWorkingPlace: form.currentWorkingPlace,
+					designation: form.designation,
+					gender,
+					specialties: [...added, ...removed],
+				}
+
+				await updateDoctor({ id: doctor.id, body }).unwrap()
+				toast.success("Doctor updated")
+			} else {
+				const payload = {
+					password: form.password,
+					doctor: {
+						name: form.name,
+						email: form.email,
+						contactNumber: form.contactNumber,
+						address: form.address,
+						registrationNumber: form.registrationNumber,
+						experience: Number(form.experience),
+						gender,
+						appointmentFee: Number(form.appointmentFee),
+						qualification: form.qualification,
+						currentWorkingPlace: form.currentWorkingPlace,
+						designation: form.designation,
+					},
+				}
+				const fd = new FormData()
+				fd.append("data", JSON.stringify(payload))
+				if (file) fd.append("file", file)
+
+				await createDoctor(fd).unwrap()
+				toast.success("Doctor created")
+			}
+			onClose()
+		} catch (err: any) {
+			toast.error(err?.data?.message || err?.message || "Something went wrong")
+		}
+	}
 
 	return (
 		<Dialog
 			open={open}
-			onClose={onClose}
+			onClose={handleClose}
 			fullWidth
 			maxWidth="md"
 			slotProps={{
@@ -91,14 +261,16 @@ const DoctorFormModal = ({ open, onClose }: Props) => {
 					<Typography
 						sx={{ fontSize: 20, fontWeight: 600, letterSpacing: "-0.02em" }}
 					>
-						Add a doctor
+						{isEdit ? "Edit doctor" : "Add a doctor"}
 					</Typography>
 					<Typography sx={{ fontSize: 13, color: "text.secondary", mt: 0.5 }}>
-						They&apos;ll receive an email to set their password on first login.
+						{isEdit
+							? "Update the doctor's profile and specialties."
+							: "Set a temporary password they can change on first login."}
 					</Typography>
 				</Box>
 				<IconButton
-					onClick={onClose}
+					onClick={handleClose}
 					size="small"
 					sx={{
 						color: "text.secondary",
@@ -110,62 +282,83 @@ const DoctorFormModal = ({ open, onClose }: Props) => {
 			</DialogTitle>
 
 			<DialogContent sx={{ p: 3 }}>
-				{/* Profile photo upload row */}
-				<Stack
-					direction="row"
-					sx={{
-						alignItems: "center",
-						gap: 2,
-						mb: "22px",
-					}}
-				>
-					<Box
+				{/* Profile photo upload row (create mode only — create supports file) */}
+				{!isEdit && (
+					<Stack
+						direction="row"
 						sx={{
-							width: 80,
-							height: 80,
-							borderRadius: "16px",
-							bgcolor: SHELL.bgSoft,
-							color: "text.secondary",
-							display: "flex",
 							alignItems: "center",
-							justifyContent: "center",
-							fontSize: 12,
-							fontFamily: MONO,
-							flexShrink: 0,
+							gap: 2,
+							mb: "22px",
 						}}
 					>
-						IMG
-					</Box>
-					<Box sx={{ flex: 1 }}>
-						<Typography
-							sx={{ fontSize: 15, fontWeight: 600, color: "text.primary" }}
-						>
-							Profile photo
-						</Typography>
-						<Typography
-							sx={{ fontSize: 12, color: "text.secondary", mt: "4px" }}
-						>
-							Uploaded to Cloudinary. Square, up to 5 MB.
-						</Typography>
-						<Button
-							variant="outlined"
-							size="small"
+						<Box
 							sx={{
-								mt: 1.25,
-								bgcolor: "#fff",
-								color: "text.primary",
-								borderColor: "divider",
+								width: 80,
+								height: 80,
+								borderRadius: "16px",
+								bgcolor: SHELL.bgSoft,
+								color: "text.secondary",
+								display: "flex",
+								alignItems: "center",
+								justifyContent: "center",
 								fontSize: 12,
-								"&:hover": {
-									borderColor: "text.primary",
-									bgcolor: SHELL.bgSoft,
-								},
+								fontFamily: MONO,
+								flexShrink: 0,
+								overflow: "hidden",
 							}}
 						>
-							Upload
-						</Button>
-					</Box>
-				</Stack>
+							{file ? (
+								// eslint-disable-next-line @next/next/no-img-element
+								<img
+									src={URL.createObjectURL(file)}
+									alt="preview"
+									style={{ width: "100%", height: "100%", objectFit: "cover" }}
+								/>
+							) : (
+								"IMG"
+							)}
+						</Box>
+						<Box sx={{ flex: 1 }}>
+							<Typography
+								sx={{ fontSize: 15, fontWeight: 600, color: "text.primary" }}
+							>
+								Profile photo
+							</Typography>
+							<Typography
+								sx={{ fontSize: 12, color: "text.secondary", mt: "4px" }}
+							>
+								{file
+									? file.name
+									: "Uploaded to Cloudinary. Square, up to 5 MB."}
+							</Typography>
+							<Button
+								component="label"
+								variant="outlined"
+								size="small"
+								sx={{
+									mt: 1.25,
+									bgcolor: "#fff",
+									color: "text.primary",
+									borderColor: "divider",
+									fontSize: 12,
+									"&:hover": {
+										borderColor: "text.primary",
+										bgcolor: SHELL.bgSoft,
+									},
+								}}
+							>
+								Upload
+								<input
+									type="file"
+									hidden
+									accept="image/*"
+									onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+								/>
+							</Button>
+						</Box>
+					</Stack>
+				)}
 
 				{/* Form grid */}
 				<Box
@@ -183,26 +376,73 @@ const DoctorFormModal = ({ open, onClose }: Props) => {
 							fullWidth
 							size="small"
 							sx={inputSx}
+							value={form.name}
+							onChange={(e) => setField("name")(e.target.value)}
 						/>
 					</Box>
 					<Box>
 						<FieldLabel>Designation</FieldLabel>
 						<TextField
-							placeholder="Consultant Cardiologist"
+							select
 							fullWidth
 							size="small"
 							sx={inputSx}
-						/>
+							value={form.designation}
+							onChange={(e) => setField("designation")(e.target.value)}
+						>
+							<MenuItem value="" disabled>
+								<em>
+									{specialtiesLoading
+										? "Loading specialties…"
+										: specialties.length === 0
+											? "No specialties available"
+											: "Select a specialty"}
+								</em>
+							</MenuItem>
+							{/* Keep a legacy designation selectable in edit mode even if it
+							    no longer matches any specialty title */}
+							{form.designation &&
+								!specialties.some(
+									(s: ISpecialty) => s.title === form.designation
+								) && (
+									<MenuItem value={form.designation}>
+										{form.designation}
+									</MenuItem>
+								)}
+							{specialties.map((s: ISpecialty) => (
+								<MenuItem key={s.id} value={s.title}>
+									{s.title}
+								</MenuItem>
+							))}
+						</TextField>
 					</Box>
 					<Box>
 						<FieldLabel>Email (login)</FieldLabel>
 						<TextField
 							placeholder="name@medicare.app"
+							type="email"
 							fullWidth
 							size="small"
 							sx={inputSx}
+							value={form.email}
+							disabled={isEdit}
+							onChange={(e) => setField("email")(e.target.value)}
 						/>
 					</Box>
+					{!isEdit && (
+						<Box>
+							<FieldLabel>Password</FieldLabel>
+							<TextField
+								placeholder="Min. 6 characters"
+								type="password"
+								fullWidth
+								size="small"
+								sx={inputSx}
+								value={form.password}
+								onChange={(e) => setField("password")(e.target.value)}
+							/>
+						</Box>
+					)}
 					<Box>
 						<FieldLabel>Contact</FieldLabel>
 						<TextField
@@ -210,6 +450,8 @@ const DoctorFormModal = ({ open, onClose }: Props) => {
 							fullWidth
 							size="small"
 							sx={inputSx}
+							value={form.contactNumber}
+							onChange={(e) => setField("contactNumber")(e.target.value)}
 						/>
 					</Box>
 					<Box>
@@ -219,6 +461,9 @@ const DoctorFormModal = ({ open, onClose }: Props) => {
 							fullWidth
 							size="small"
 							sx={inputSx}
+							value={form.registrationNumber}
+							disabled={isEdit}
+							onChange={(e) => setField("registrationNumber")(e.target.value)}
 						/>
 					</Box>
 					<Box>
@@ -243,12 +488,13 @@ const DoctorFormModal = ({ open, onClose }: Props) => {
 											fontSize: 13,
 											cursor: "pointer",
 											transition: "all 140ms",
+											textTransform: "capitalize",
 											"&:hover": {
 												borderColor: on ? "primary.main" : "text.primary",
 											},
 										}}
 									>
-										{g}
+										{g.toLowerCase()}
 									</Box>
 								)
 							})}
@@ -262,6 +508,8 @@ const DoctorFormModal = ({ open, onClose }: Props) => {
 							fullWidth
 							size="small"
 							sx={inputSx}
+							value={form.experience}
+							onChange={(e) => setField("experience")(e.target.value)}
 						/>
 					</Box>
 					<Box>
@@ -272,10 +520,23 @@ const DoctorFormModal = ({ open, onClose }: Props) => {
 							fullWidth
 							size="small"
 							sx={inputSx}
+							value={form.appointmentFee}
+							onChange={(e) => setField("appointmentFee")(e.target.value)}
 						/>
 					</Box>
 
 					{/* Full-row fields */}
+					<Box sx={{ gridColumn: { sm: "1 / -1" } }}>
+						<FieldLabel>Address</FieldLabel>
+						<TextField
+							placeholder="Street, city"
+							fullWidth
+							size="small"
+							sx={inputSx}
+							value={form.address}
+							onChange={(e) => setField("address")(e.target.value)}
+						/>
+					</Box>
 					<Box sx={{ gridColumn: { sm: "1 / -1" } }}>
 						<FieldLabel>Current workplace</FieldLabel>
 						<TextField
@@ -283,72 +544,64 @@ const DoctorFormModal = ({ open, onClose }: Props) => {
 							fullWidth
 							size="small"
 							sx={inputSx}
+							value={form.currentWorkingPlace}
+							onChange={(e) => setField("currentWorkingPlace")(e.target.value)}
 						/>
 					</Box>
-					<Box sx={{ gridColumn: { sm: "1 / -1" } }}>
-						<FieldLabel>Specialties</FieldLabel>
-						<Stack direction="row" sx={{ gap: 1, flexWrap: "wrap" }}>
-							{specialties.map((s) => (
-								<Stack
-									key={s}
-									direction="row"
-									sx={{
-										alignItems: "center",
-										gap: 0.75,
-										px: 1.5,
-										py: 0.75,
-										borderRadius: 999,
-										bgcolor: "primary.light",
-										color: "primary.main",
-										border: "1px solid",
-										borderColor: "primary.main",
-										fontSize: 12,
-										fontWeight: 600,
-									}}
-								>
-									<Box component="span">{s}</Box>
-									<Box
-										component="button"
-										onClick={() => removeSpecialty(s)}
-										sx={{
-											border: "none",
-											bgcolor: "transparent",
-											color: "primary.main",
-											cursor: "pointer",
-											fontSize: 14,
-											lineHeight: 1,
-											p: 0,
-											display: "inline-flex",
-											alignItems: "center",
-										}}
-									>
-										×
-									</Box>
-								</Stack>
-							))}
-							<Box
-								component="button"
-								sx={{
-									px: 1.5,
-									py: 0.75,
-									borderRadius: 999,
-									bgcolor: "transparent",
-									color: "text.secondary",
-									border: "1px dashed",
-									borderColor: "divider",
-									fontSize: 12,
-									fontWeight: 600,
-									cursor: "pointer",
-									"&:hover": {
-										borderColor: "text.primary",
-										color: "text.primary",
-									},
-								}}
-							>
-								+ Add specialty
-							</Box>
-						</Stack>
-					</Box>
+
+					{/* Specialties — only editable in edit mode (create endpoint ignores them) */}
+					{isEdit && (
+						<Box sx={{ gridColumn: { sm: "1 / -1" } }}>
+							<FieldLabel>Specialties</FieldLabel>
+							<Stack direction="row" sx={{ gap: 1, flexWrap: "wrap" }}>
+								{specialtiesLoading ? (
+									<Typography sx={{ fontSize: 12, color: "text.secondary" }}>
+										Loading specialties…
+									</Typography>
+								) : specialties.length === 0 ? (
+									<Typography sx={{ fontSize: 12, color: "text.secondary" }}>
+										No specialties available.
+									</Typography>
+								) : (
+									specialties.map((s: ISpecialty) => {
+										const on = selected.includes(s.id)
+										return (
+											<Box
+												key={s.id}
+												component="button"
+												type="button"
+												onClick={() => toggleSpecialty(s.id)}
+												sx={{
+													display: "inline-flex",
+													alignItems: "center",
+													gap: 0.75,
+													px: 1.5,
+													py: 0.75,
+													borderRadius: 999,
+													bgcolor: on ? "primary.light" : "transparent",
+													color: on ? "primary.main" : "text.secondary",
+													border: on ? "1px solid" : "1px dashed",
+													borderColor: on ? "primary.main" : "divider",
+													fontSize: 12,
+													fontWeight: 600,
+													cursor: "pointer",
+													transition: "all 140ms",
+													"&:hover": {
+														borderColor: on ? "primary.main" : "text.primary",
+														color: on ? "primary.main" : "text.primary",
+													},
+												}}
+											>
+												<Box component="span">{s.title}</Box>
+												{on && <Box component="span">×</Box>}
+											</Box>
+										)
+									})
+								)}
+							</Stack>
+						</Box>
+					)}
+
 					<Box sx={{ gridColumn: { sm: "1 / -1" } }}>
 						<FieldLabel>Qualification</FieldLabel>
 						<TextField
@@ -356,6 +609,8 @@ const DoctorFormModal = ({ open, onClose }: Props) => {
 							fullWidth
 							size="small"
 							sx={inputSx}
+							value={form.qualification}
+							onChange={(e) => setField("qualification")(e.target.value)}
 						/>
 					</Box>
 				</Box>
@@ -372,8 +627,9 @@ const DoctorFormModal = ({ open, onClose }: Props) => {
 				}}
 			>
 				<Button
-					onClick={onClose}
+					onClick={handleClose}
 					variant="outlined"
+					disabled={isLoading}
 					sx={{
 						bgcolor: "#fff",
 						color: "text.primary",
@@ -383,7 +639,13 @@ const DoctorFormModal = ({ open, onClose }: Props) => {
 				>
 					Cancel
 				</Button>
-				<Button onClick={onClose}>Create doctor</Button>
+				<Button onClick={handleSubmit} disabled={isLoading}>
+					{isLoading
+						? "Saving…"
+						: isEdit
+							? "Save changes"
+							: "Create doctor"}
+				</Button>
 			</DialogActions>
 		</Dialog>
 	)

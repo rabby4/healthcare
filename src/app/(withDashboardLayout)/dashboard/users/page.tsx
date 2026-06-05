@@ -1,108 +1,82 @@
 "use client"
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { Box, Stack, Typography } from "@mui/material"
 import KeyboardArrowDownRoundedIcon from "@mui/icons-material/KeyboardArrowDownRounded"
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined"
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded"
 import { useState } from "react"
+import { toast } from "sonner"
 
 import AvatarGradient from "@/components/dashboard/shell/AvatarGradient"
 import PageHead from "@/components/dashboard/shell/PageHead"
 import StatusBadge from "@/components/dashboard/shell/StatusBadge"
 import { AvatarVariant, MONO, SHELL } from "@/components/dashboard/shell/tokens"
+import {
+	useChangeUserStatusMutation,
+	useGetAllUsersQuery,
+} from "@/redux/api/userApi"
+import useUserInfo from "@/hooks/useUserInfo"
 
-type User = {
-	initials: string
-	variant: AvatarVariant
-	name: string
-	email: string
-	role: "Patient" | "Doctor"
-	joined: string
-	lastActive: string
-	status: "active" | "cancelled" | "inprogress"
-	statusLabel?: string
-	action: "default" | "reinstate"
+const filterPills: { label: string; arg: Record<string, any> }[] = [
+	{ label: "All", arg: {} },
+	{ label: "Patients", arg: { role: "PATIENT" } },
+	{ label: "Doctors", arg: { role: "DOCTOR" } },
+	{ label: "Blocked", arg: { status: "BLOCKED" } },
+]
+
+const headers = ["User", "Role", "Joined", "Status", "Actions"]
+
+const AVATAR_VARIANTS: AvatarVariant[] = ["teal", "blue", "purple", "orange", "green"]
+
+const getInitials = (name: string) => {
+	const parts = name.trim().split(/\s+/).filter(Boolean)
+	if (parts.length === 0) return "?"
+	if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
+	return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
 }
 
-const users: User[] = [
-	{
-		initials: "FR",
-		variant: "teal",
-		name: "Farzana Rahman",
-		email: "farzana.r@email.com",
-		role: "Patient",
-		joined: "Mar 2024",
-		lastActive: "Today",
-		status: "active",
-		action: "default",
-	},
-	{
-		initials: "AR",
-		variant: "teal",
-		name: "Dr. Asma Rahman",
-		email: "dr.asma@medicare.app",
-		role: "Doctor",
-		joined: "Feb 2025",
-		lastActive: "Today",
-		status: "active",
-		action: "default",
-	},
-	{
-		initials: "RU",
-		variant: "blue",
-		name: "Rahim Uddin",
-		email: "rahim.u@email.com",
-		role: "Patient",
-		joined: "Jan 2025",
-		lastActive: "2 days ago",
-		status: "active",
-		action: "default",
-	},
-	{
-		initials: "SP",
-		variant: "purple",
-		name: "Sumon Pal",
-		email: "sumon.p@email.com",
-		role: "Patient",
-		joined: "Dec 2024",
-		lastActive: "1 month ago",
-		status: "cancelled",
-		statusLabel: "Blocked",
-		action: "reinstate",
-	},
-	{
-		initials: "RN",
-		variant: "orange",
-		name: "Dr. Rumana Nasir",
-		email: "r.nasir@medicare.app",
-		role: "Doctor",
-		joined: "May 2023",
-		lastActive: "2 weeks ago",
-		status: "cancelled",
-		statusLabel: "Suspended",
-		action: "reinstate",
-	},
-	{
-		initials: "MA",
-		variant: "orange",
-		name: "Mahmuda Akter",
-		email: "m.akter@email.com",
-		role: "Patient",
-		joined: "Apr 2026",
-		lastActive: "5 hours ago",
-		status: "inprogress",
-		statusLabel: "Needs password",
-		action: "default",
-	},
-]
+const getVariant = (seed: string): AvatarVariant => {
+	let hash = 0
+	for (let i = 0; i < seed.length; i++) hash = (hash * 31 + seed.charCodeAt(i)) >>> 0
+	return AVATAR_VARIANTS[hash % AVATAR_VARIANTS.length]
+}
 
-const filterPills = [
-	{ label: "All", count: "18,642" },
-	{ label: "Patients", count: "18,402" },
-	{ label: "Doctors", count: "240" },
-	{ label: "Blocked", count: "23" },
-]
+const formatJoined = (iso?: string) => {
+	if (!iso) return "—"
+	const d = new Date(iso)
+	if (isNaN(d.getTime())) return "—"
+	return d.toLocaleDateString(undefined, { month: "short", year: "numeric" })
+}
 
-const headers = ["User", "Role", "Joined", "Last active", "Status", "Actions"]
+const roleBadge = (role: string): { kind: "teal" | "purple" | "neutral"; label: string } => {
+	switch (role) {
+		case "DOCTOR":
+			return { kind: "teal", label: "Doctor" }
+		case "SUPER_ADMIN":
+			return { kind: "purple", label: "Super Admin" }
+		case "ADMIN":
+			return { kind: "purple", label: "Admin" }
+		case "PATIENT":
+			return { kind: "neutral", label: "Patient" }
+		default:
+			return { kind: "neutral", label: role || "—" }
+	}
+}
+
+const statusBadge = (status: string): { kind: "active" | "cancelled"; label: string } => {
+	switch (status) {
+		case "ACTIVE":
+			return { kind: "active", label: "Active" }
+		case "BLOCKED":
+			return { kind: "cancelled", label: "Blocked" }
+		case "DELETED":
+			return { kind: "cancelled", label: "Deleted" }
+		default:
+			return { kind: "cancelled", label: status || "—" }
+	}
+}
 
 const cellSx = (last: boolean) => ({
 	p: "16px 20px",
@@ -116,13 +90,19 @@ const ActionLink = ({
 	children,
 	danger,
 	primary,
+	disabled,
+	onClick,
 }: {
 	children: React.ReactNode
 	danger?: boolean
 	primary?: boolean
+	disabled?: boolean
+	onClick?: () => void
 }) => (
 	<Box
 		component="button"
+		disabled={disabled}
+		onClick={onClick}
 		sx={{
 			fontSize: 12,
 			fontWeight: 600,
@@ -131,7 +111,8 @@ const ActionLink = ({
 			borderRadius: "6px",
 			border: "none",
 			bgcolor: "transparent",
-			cursor: "pointer",
+			cursor: disabled ? "not-allowed" : "pointer",
+			opacity: disabled ? 0.5 : 1,
 			color: danger ? SHELL.urgent : primary ? "primary.main" : "text.secondary",
 			"&:hover": { bgcolor: SHELL.bgSoft, color: danger ? SHELL.urgent : "text.primary" },
 		}}
@@ -140,8 +121,63 @@ const ActionLink = ({
 	</Box>
 )
 
+const MessageRow = ({ children }: { children: React.ReactNode }) => (
+	<Box component="tr">
+		<Box
+			component="td"
+			colSpan={headers.length}
+			sx={{
+				p: "40px 20px",
+				textAlign: "center",
+				fontSize: 13,
+				color: "text.secondary",
+			}}
+		>
+			{children}
+		</Box>
+	</Box>
+)
+
 const UsersPage = () => {
 	const [activePill, setActivePill] = useState(0)
+	const [searchTerm, setSearchTerm] = useState("")
+
+	const queryArg: Record<string, any> = { ...filterPills[activePill].arg }
+	if (searchTerm.trim()) queryArg.searchTerm = searchTerm.trim()
+
+	const { data, isLoading, isError } = useGetAllUsersQuery(queryArg)
+	const [changeStatus, { isLoading: isChanging }] = useChangeUserStatusMutation()
+
+	// Viewer identity (role is lowercased by getUserInfo: "super_admin" | "admin").
+	const viewer = useUserInfo()
+	const isSuperAdminViewer = viewer?.role === "super_admin"
+	const viewerEmail = viewer?.email
+
+	const allUsers: any[] = data?.users ?? []
+	// Only a super admin may see super-admin accounts at all. Admins never see
+	// the super admin's profile, email, or any of its information.
+	const users: any[] = isSuperAdminViewer
+		? allUsers
+		: allUsers.filter((u) => u.role !== "SUPER_ADMIN")
+	const meta = data?.meta as { total?: number; page?: number; limit?: number } | undefined
+
+	const handleStatus = async (id: string, status: string) => {
+		if (status === "DELETED" || status === "BLOCKED") {
+			if (!window.confirm("Are you sure?")) return
+		}
+		try {
+			await changeStatus({ id, body: { status } }).unwrap()
+			toast.success("User status updated")
+		} catch (err: any) {
+			toast.error(err?.data?.message || err?.message || "Something went wrong")
+		}
+	}
+
+	const total = meta?.total ?? users.length
+	const page = meta?.page ?? 1
+	const limit = meta?.limit ?? users.length
+	const startIdx = users.length === 0 ? 0 : (page - 1) * limit + 1
+	const endIdx = users.length === 0 ? 0 : startIdx + users.length - 1
 
 	return (
 		<>
@@ -176,16 +212,6 @@ const UsersPage = () => {
 							}}
 						>
 							<Box component="span">{p.label}</Box>
-							<Box
-								component="span"
-								sx={{
-									fontFamily: MONO,
-									fontSize: 11,
-									opacity: 0.7,
-								}}
-							>
-								{p.count}
-							</Box>
 						</Stack>
 					)
 				})}
@@ -232,7 +258,9 @@ const UsersPage = () => {
 						<SearchRoundedIcon sx={{ fontSize: 16 }} />
 						<Box
 							component="input"
-							placeholder="Search by name or email…"
+							placeholder="Search by email…"
+							value={searchTerm}
+							onChange={(e: any) => setSearchTerm(e.target.value)}
 							sx={{
 								flex: 1,
 								bgcolor: "transparent",
@@ -298,64 +326,106 @@ const UsersPage = () => {
 							</Box>
 						</Box>
 						<Box component="tbody">
-							{users.map((u, i) => {
-								const isLast = i === users.length - 1
-								return (
-									<Box
-										key={u.email}
-										component="tr"
-										sx={{ "&:hover td": { bgcolor: SHELL.bgSoft } }}
-									>
-										<Box component="td" sx={cellSx(isLast)}>
-											<Stack direction="row" sx={{ alignItems: "center", gap: 1.5 }}>
-												<AvatarGradient initials={u.initials} variant={u.variant} size={36} />
-												<Box>
-													<Typography sx={{ fontSize: 14, fontWeight: 600, color: "text.primary" }}>
-														{u.name}
-													</Typography>
-													<Typography sx={{ fontSize: 12, color: "text.secondary", mt: "1px" }}>
-														{u.email}
-													</Typography>
-												</Box>
-											</Stack>
-										</Box>
-										<Box component="td" sx={cellSx(isLast)}>
-											<StatusBadge
-												kind={u.role === "Doctor" ? "teal" : "neutral"}
-												label={u.role}
-												withDot={false}
-											/>
-										</Box>
-										<Box component="td" sx={cellSx(isLast)}>
-											{u.joined}
-										</Box>
-										<Box component="td" sx={cellSx(isLast)}>
-											{u.lastActive}
-										</Box>
-										<Box component="td" sx={cellSx(isLast)}>
-											<StatusBadge kind={u.status} label={u.statusLabel} />
-										</Box>
+							{isLoading ? (
+								<MessageRow>Loading users…</MessageRow>
+							) : isError ? (
+								<MessageRow>Failed to load users. Please try again.</MessageRow>
+							) : users.length === 0 ? (
+								<MessageRow>No users found.</MessageRow>
+							) : (
+								users.map((u, i) => {
+									const isLast = i === users.length - 1
+									const name =
+										u.Admin?.name ?? u.Doctor?.name ?? u.Patient?.name ?? u.email
+									const rb = roleBadge(u.role)
+									const sb = statusBadge(u.status)
+									const isActive = u.status === "ACTIVE"
+									// Super admins are protected — never blockable/deletable by anyone.
+									const isSuperAdminRow = u.role === "SUPER_ADMIN"
+									return (
 										<Box
-											component="td"
-											sx={{ ...cellSx(isLast), textAlign: "right" }}
+											key={u.id}
+											component="tr"
+											sx={{ "&:hover td": { bgcolor: SHELL.bgSoft } }}
 										>
-											<Stack direction="row" sx={{ gap: 0.75, justifyContent: "flex-end" }}>
-												{u.action === "reinstate" ? (
-													<>
-														<ActionLink primary>Reinstate</ActionLink>
-														<ActionLink danger>Delete</ActionLink>
-													</>
-												) : (
-													<>
-														<ActionLink>View</ActionLink>
-														<ActionLink danger>Block</ActionLink>
-													</>
-												)}
-											</Stack>
+											<Box component="td" sx={cellSx(isLast)}>
+												<Stack direction="row" sx={{ alignItems: "center", gap: 1.5 }}>
+													<AvatarGradient
+														initials={getInitials(name)}
+														variant={getVariant(u.email || u.id || name)}
+														size={36}
+													/>
+													<Box>
+														<Typography sx={{ fontSize: 14, fontWeight: 600, color: "text.primary" }}>
+															{name}
+														</Typography>
+														<Typography sx={{ fontSize: 12, color: "text.secondary", mt: "1px" }}>
+															{u.email}
+														</Typography>
+													</Box>
+												</Stack>
+											</Box>
+											<Box component="td" sx={cellSx(isLast)}>
+												<StatusBadge kind={rb.kind} label={rb.label} withDot={false} />
+											</Box>
+											<Box component="td" sx={cellSx(isLast)}>
+												{formatJoined(u.createdAt)}
+											</Box>
+											<Box component="td" sx={cellSx(isLast)}>
+												<Stack direction="row" sx={{ alignItems: "center", gap: 0.75, flexWrap: "wrap" }}>
+													<StatusBadge kind={sb.kind} label={sb.label} />
+													{u.needPasswordChange && isActive && (
+														<StatusBadge kind="inprogress" label="Needs password" />
+													)}
+												</Stack>
+											</Box>
+											<Box
+												component="td"
+												sx={{ ...cellSx(isLast), textAlign: "right" }}
+											>
+												<Stack direction="row" sx={{ gap: 0.75, justifyContent: "flex-end", alignItems: "center" }}>
+													{isSuperAdminRow ? (
+														<Stack direction="row" sx={{ alignItems: "center", gap: 0.5, color: "text.secondary" }}>
+															<LockOutlinedIcon sx={{ fontSize: 14 }} />
+															<Typography sx={{ fontSize: 12, fontWeight: 600 }}>
+																Protected
+															</Typography>
+														</Stack>
+													) : (
+														<>
+															<ActionLink>View</ActionLink>
+															{isActive ? (
+																<ActionLink
+																	danger
+																	disabled={isChanging}
+																	onClick={() => handleStatus(u.id, "BLOCKED")}
+																>
+																	Block
+																</ActionLink>
+															) : (
+																<ActionLink
+																	primary
+																	disabled={isChanging}
+																	onClick={() => handleStatus(u.id, "ACTIVE")}
+																>
+																	Reinstate
+																</ActionLink>
+															)}
+															<ActionLink
+																danger
+																disabled={isChanging}
+																onClick={() => handleStatus(u.id, "DELETED")}
+															>
+																Delete
+															</ActionLink>
+														</>
+													)}
+												</Stack>
+											</Box>
 										</Box>
-									</Box>
-								)
-							})}
+									)
+								})
+							)}
 						</Box>
 					</Box>
 				</Box>
@@ -373,16 +443,14 @@ const UsersPage = () => {
 						color: "text.secondary",
 					}}
 				>
-					<Box>Showing 1 — 6 of 18,642 users</Box>
+					<Box>
+						Showing {startIdx} — {endIdx} of {total} users
+					</Box>
 					<Stack direction="row" sx={{ gap: 0.5 }}>
 						{[
 							{ label: "‹", disabled: true },
 							{ label: "1", active: true },
-							{ label: "2" },
-							{ label: "3" },
-							{ label: "…" },
-							{ label: "2,107" },
-							{ label: "›" },
+							{ label: "›", disabled: true },
 						].map((p, i) => (
 							<Box
 								key={i}

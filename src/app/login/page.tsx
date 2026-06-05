@@ -38,6 +38,10 @@ const LoginPage = () => {
 			if (res?.data?.accessToken) {
 				toast.success(res.message ?? "Welcome back")
 				storeUserInfo({ accessToken: res.data.accessToken })
+				// Full-page navigation: guarantees the proxy guard sees the fresh
+				// auth cookie and the dashboard renders with a clean router cache.
+				window.location.assign("/dashboard")
+				return
 			} else {
 				setError(res?.message ?? "Login failed. Please check your credentials.")
 			}

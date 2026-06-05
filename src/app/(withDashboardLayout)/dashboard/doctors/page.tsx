@@ -1,142 +1,23 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
 import { Box, Button, Stack, Typography } from "@mui/material"
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined"
 import KeyboardArrowDownRoundedIcon from "@mui/icons-material/KeyboardArrowDownRounded"
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded"
-import { useState } from "react"
+import { useMemo, useState } from "react"
+import { toast } from "sonner"
 
 import AvatarGradient from "@/components/dashboard/shell/AvatarGradient"
 import PageHead from "@/components/dashboard/shell/PageHead"
-import StatusBadge, { StatusKind } from "@/components/dashboard/shell/StatusBadge"
+import StatusBadge from "@/components/dashboard/shell/StatusBadge"
 import { AvatarVariant, MONO, SHELL } from "@/components/dashboard/shell/tokens"
+import {
+	useDeleteDoctorMutation,
+	useGetAllDoctorsQuery,
+} from "@/redux/api/doctorApi"
+import { IDoctor } from "@/types"
 import DoctorFormModal from "./DoctorFormModal"
-
-type DoctorAction = {
-	label: string
-	primary?: boolean
-	danger?: boolean
-}
-
-type Doctor = {
-	initials: string
-	variant: AvatarVariant
-	name: string
-	email: string
-	regNo: string
-	specialty: string
-	experience: string
-	fee: string
-	rating: string
-	status: StatusKind
-	statusLabel: string
-	actions: DoctorAction[]
-}
-
-const doctors: Doctor[] = [
-	{
-		initials: "AR",
-		variant: "teal",
-		name: "Dr. Asma Rahman",
-		email: "dr.asma@medicare.app",
-		regNo: "A-49271",
-		specialty: "Cardiology",
-		experience: "14y",
-		fee: "৳ 1,500",
-		rating: "4.9 ★",
-		status: "active",
-		statusLabel: "Active",
-		actions: [
-			{ label: "Edit", primary: true },
-			{ label: "Suspend" },
-		],
-	},
-	{
-		initials: "TH",
-		variant: "blue",
-		name: "Dr. Tanvir Hossain",
-		email: "t.hossain@medicare.app",
-		regNo: "A-50118",
-		specialty: "Cardiology",
-		experience: "11y",
-		fee: "৳ 1,200",
-		rating: "4.8 ★",
-		status: "active",
-		statusLabel: "Active",
-		actions: [
-			{ label: "Edit", primary: true },
-			{ label: "Suspend" },
-		],
-	},
-	{
-		initials: "MI",
-		variant: "purple",
-		name: "Dr. Mehnaz Iqbal",
-		email: "m.iqbal@medicare.app",
-		regNo: "A-51902",
-		specialty: "Neurology",
-		experience: "9y",
-		fee: "৳ 1,400",
-		rating: "4.9 ★",
-		status: "active",
-		statusLabel: "Active",
-		actions: [
-			{ label: "Edit", primary: true },
-			{ label: "Suspend" },
-		],
-	},
-	{
-		initials: "SK",
-		variant: "orange",
-		name: "Dr. Sadia Khan",
-		email: "s.khan@medicare.app",
-		regNo: "A-48771",
-		specialty: "Pediatrics",
-		experience: "12y",
-		fee: "৳ 900",
-		rating: "4.9 ★",
-		status: "active",
-		statusLabel: "Active",
-		actions: [
-			{ label: "Edit", primary: true },
-			{ label: "Suspend" },
-		],
-	},
-	{
-		initials: "FA",
-		variant: "green",
-		name: "Dr. Faisal Ahmed",
-		email: "f.ahmed@medicare.app",
-		regNo: "pending",
-		specialty: "Orthopedics",
-		experience: "7y",
-		fee: "৳ 1,000",
-		rating: "—",
-		status: "inprogress",
-		statusLabel: "Pending",
-		actions: [
-			{ label: "Verify", primary: true },
-			{ label: "Reject" },
-		],
-	},
-	{
-		initials: "RN",
-		variant: "orange",
-		name: "Dr. Rumana Nasir",
-		email: "r.nasir@medicare.app",
-		regNo: "A-47210",
-		specialty: "Dermatology",
-		experience: "10y",
-		fee: "৳ 1,100",
-		rating: "4.6 ★",
-		status: "cancelled",
-		statusLabel: "Suspended",
-		actions: [
-			{ label: "Reactivate", primary: true },
-			{ label: "Delete", danger: true },
-		],
-	},
-]
 
 const headers: { label: string; align?: "left" | "right"; width?: string }[] = [
 	{ label: "Doctor", width: "26%" },
@@ -148,17 +29,24 @@ const headers: { label: string; align?: "left" | "right"; width?: string }[] = [
 	{ label: "Actions", align: "right" },
 ]
 
-const selectFilters = ["Specialty: All", "Status: All", "Sort: Rating"]
+const selectFilters = ["Specialty: All", "Sort: Rating"]
 
-const pageButtons: { label: string; active?: boolean; disabled?: boolean }[] = [
-	{ label: "‹", disabled: true },
-	{ label: "1", active: true },
-	{ label: "2" },
-	{ label: "3" },
-	{ label: "…" },
-	{ label: "40" },
-	{ label: "›" },
-]
+const avatarVariants: AvatarVariant[] = ["teal", "blue", "purple", "orange", "green"]
+
+const variantFor = (key: string) => {
+	let hash = 0
+	for (let i = 0; i < key.length; i++) hash = (hash * 31 + key.charCodeAt(i)) | 0
+	return avatarVariants[Math.abs(hash) % avatarVariants.length]
+}
+
+const initialsFor = (name: string) =>
+	name
+		.replace(/^Dr\.?\s*/i, "")
+		.split(/\s+/)
+		.filter(Boolean)
+		.slice(0, 2)
+		.map((w) => w[0]?.toUpperCase() ?? "")
+		.join("") || "DR"
 
 const cellSx = (last: boolean) => ({
 	p: "16px 20px",
@@ -172,16 +60,19 @@ const ActionLink = ({
 	children,
 	primary,
 	danger,
+	disabled,
 	onClick,
 }: {
 	children: React.ReactNode
 	primary?: boolean
 	danger?: boolean
+	disabled?: boolean
 	onClick?: () => void
 }) => (
 	<Box
 		component="button"
 		onClick={onClick}
+		disabled={disabled}
 		sx={{
 			fontSize: 12,
 			fontWeight: 600,
@@ -190,10 +81,11 @@ const ActionLink = ({
 			borderRadius: "6px",
 			border: "none",
 			bgcolor: "transparent",
-			cursor: "pointer",
+			cursor: disabled ? "not-allowed" : "pointer",
+			opacity: disabled ? 0.5 : 1,
 			color: danger ? SHELL.urgent : primary ? "primary.main" : "text.secondary",
 			"&:hover": {
-				bgcolor: SHELL.bgSoft,
+				bgcolor: disabled ? "transparent" : SHELL.bgSoft,
 				color: danger ? SHELL.urgent : "text.primary",
 			},
 		}}
@@ -202,17 +94,95 @@ const ActionLink = ({
 	</Box>
 )
 
+const MessageRow = ({ children }: { children: React.ReactNode }) => (
+	<Box component="tr">
+		<Box
+			component="td"
+			colSpan={headers.length}
+			sx={{
+				p: "32px 20px",
+				textAlign: "center",
+				fontSize: 13,
+				color: "text.secondary",
+			}}
+		>
+			{children}
+		</Box>
+	</Box>
+)
+
+const SkeletonRow = ({ last }: { last: boolean }) => (
+	<Box component="tr">
+		{headers.map((h, i) => (
+			<Box key={i} component="td" sx={cellSx(last)}>
+				<Box
+					sx={{
+						height: 12,
+						borderRadius: 999,
+						bgcolor: SHELL.bgSoft,
+						width: i === 0 ? "70%" : "50%",
+						ml: h.align === "right" ? "auto" : 0,
+					}}
+				/>
+			</Box>
+		))}
+	</Box>
+)
+
 const DoctorsPage = () => {
 	const [modalOpen, setModalOpen] = useState(false)
+	const [editing, setEditing] = useState<IDoctor | null>(null)
+	const [searchTerm, setSearchTerm] = useState("")
+	const [page, setPage] = useState(1)
+	const limit = 6
 
-	const openModal = () => setModalOpen(true)
-	const closeModal = () => setModalOpen(false)
+	const query = useMemo(() => {
+		const q: Record<string, any> = { page, limit }
+		if (searchTerm) q.searchTerm = searchTerm
+		return q
+	}, [page, searchTerm])
+
+	const { data, isLoading, isError } = useGetAllDoctorsQuery(query)
+	const [deleteDoctor, { isLoading: isDeleting }] = useDeleteDoctorMutation()
+
+	const doctors: IDoctor[] = data?.doctors ?? []
+	const meta = data?.meta
+
+	const openCreate = () => {
+		setEditing(null)
+		setModalOpen(true)
+	}
+	const openEdit = (doctor: IDoctor) => {
+		setEditing(doctor)
+		setModalOpen(true)
+	}
+	const closeModal = () => {
+		setModalOpen(false)
+		setEditing(null)
+	}
+
+	const handleDelete = async (doctor: IDoctor) => {
+		if (!window.confirm("Are you sure?")) return
+		try {
+			await deleteDoctor(doctor.id).unwrap()
+			toast.success("Doctor removed")
+		} catch (err: any) {
+			toast.error(err?.data?.message || err?.message || "Something went wrong")
+		}
+	}
+
+	const total = meta?.total ?? doctors.length
+	const currentPage = meta?.page ?? page
+	const pageLimit = meta?.limit ?? limit
+	const from = total === 0 ? 0 : (currentPage - 1) * pageLimit + 1
+	const to = Math.min(currentPage * pageLimit, total)
+	const pageCount = Math.max(1, Math.ceil(total / pageLimit))
 
 	return (
 		<>
 			<PageHead
 				title="Doctors"
-				subtitle="240 doctors · 232 active · 5 pending verification · 3 suspended"
+				subtitle={`${total} doctor${total === 1 ? "" : "s"} · all active`}
 				actions={
 					<>
 						<Button
@@ -227,7 +197,7 @@ const DoctorsPage = () => {
 						>
 							Export
 						</Button>
-						<Button onClick={openModal}>+ Add doctor</Button>
+						<Button onClick={openCreate}>+ Add doctor</Button>
 					</>
 				}
 			/>
@@ -272,6 +242,11 @@ const DoctorsPage = () => {
 						<SearchRoundedIcon sx={{ fontSize: 16 }} />
 						<Box
 							component="input"
+							value={searchTerm}
+							onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+								setSearchTerm(e.target.value)
+								setPage(1)
+							}}
 							placeholder="Search by name, email, or registration no…"
 							sx={{
 								flex: 1,
@@ -340,106 +315,128 @@ const DoctorsPage = () => {
 							</Box>
 						</Box>
 						<Box component="tbody">
-							{doctors.map((d, i) => {
-								const isLast = i === doctors.length - 1
-								return (
-									<Box
-										key={d.email}
-										component="tr"
-										sx={{ "&:hover td": { bgcolor: SHELL.bgSoft } }}
-									>
-										<Box component="td" sx={cellSx(isLast)}>
-											<Stack direction="row" sx={{ alignItems: "center", gap: 1.5 }}>
-												<AvatarGradient
-													initials={d.initials}
-													variant={d.variant}
-													size={36}
-												/>
-												<Box>
-													<Typography
-														sx={{
-															fontSize: 14,
-															fontWeight: 600,
-															color: "text.primary",
-														}}
-													>
-														{d.name}
-													</Typography>
-													<Typography
-														sx={{
-															fontSize: 12,
-															color: "text.secondary",
-															mt: "1px",
-														}}
-													>
-														{d.email} · {d.regNo}
-													</Typography>
-												</Box>
-											</Stack>
-										</Box>
-										<Box component="td" sx={cellSx(isLast)}>
-											{d.specialty}
-										</Box>
+							{isLoading ? (
+								[0, 1, 2, 3].map((i) => (
+									<SkeletonRow key={i} last={i === 3} />
+								))
+							) : isError ? (
+								<MessageRow>
+									<Typography sx={{ color: SHELL.urgent, fontSize: 13 }}>
+										Failed to load doctors. Please try again.
+									</Typography>
+								</MessageRow>
+							) : doctors.length === 0 ? (
+								<MessageRow>No doctors found.</MessageRow>
+							) : (
+								doctors.map((d, i) => {
+									const isLast = i === doctors.length - 1
+									const specialty =
+										d.doctorSpecialties
+											?.map((ds) => ds.specialties?.title)
+											.filter(Boolean)
+											.join(", ") || "—"
+									const rating = d.averageRating
+										? `${d.averageRating.toFixed(1)} ★`
+										: "—"
+									return (
 										<Box
-											component="td"
-											sx={{
-												...cellSx(isLast),
-												textAlign: "right",
-												fontFamily: MONO,
-												fontVariantNumeric: "tabular-nums",
-											}}
+											key={d.id}
+											component="tr"
+											sx={{ "&:hover td": { bgcolor: SHELL.bgSoft } }}
 										>
-											{d.experience}
-										</Box>
-										<Box
-											component="td"
-											sx={{
-												...cellSx(isLast),
-												textAlign: "right",
-												fontFamily: MONO,
-												fontVariantNumeric: "tabular-nums",
-											}}
-										>
-											{d.fee}
-										</Box>
-										<Box
-											component="td"
-											sx={{
-												...cellSx(isLast),
-												textAlign: "right",
-												fontFamily: MONO,
-												fontVariantNumeric: "tabular-nums",
-												color: d.rating === "—" ? "text.secondary" : "text.primary",
-											}}
-										>
-											{d.rating}
-										</Box>
-										<Box component="td" sx={cellSx(isLast)}>
-											<StatusBadge kind={d.status} label={d.statusLabel} />
-										</Box>
-										<Box
-											component="td"
-											sx={{ ...cellSx(isLast), textAlign: "right" }}
-										>
-											<Stack
-												direction="row"
-												sx={{ gap: 0.75, justifyContent: "flex-end" }}
+											<Box component="td" sx={cellSx(isLast)}>
+												<Stack direction="row" sx={{ alignItems: "center", gap: 1.5 }}>
+													<AvatarGradient
+														initials={initialsFor(d.name)}
+														variant={variantFor(d.id || d.email)}
+														size={36}
+													/>
+													<Box>
+														<Typography
+															sx={{
+																fontSize: 14,
+																fontWeight: 600,
+																color: "text.primary",
+															}}
+														>
+															{d.name}
+														</Typography>
+														<Typography
+															sx={{
+																fontSize: 12,
+																color: "text.secondary",
+																mt: "1px",
+															}}
+														>
+															{d.email} · {d.registrationNumber}
+														</Typography>
+													</Box>
+												</Stack>
+											</Box>
+											<Box component="td" sx={cellSx(isLast)}>
+												{specialty}
+											</Box>
+											<Box
+												component="td"
+												sx={{
+													...cellSx(isLast),
+													textAlign: "right",
+													fontFamily: MONO,
+													fontVariantNumeric: "tabular-nums",
+												}}
 											>
-												{d.actions.map((a) => (
-													<ActionLink
-														key={a.label}
-														primary={a.primary}
-														danger={a.danger}
-														onClick={a.primary ? openModal : undefined}
-													>
-														{a.label}
+												{d.experience}y
+											</Box>
+											<Box
+												component="td"
+												sx={{
+													...cellSx(isLast),
+													textAlign: "right",
+													fontFamily: MONO,
+													fontVariantNumeric: "tabular-nums",
+												}}
+											>
+												৳ {d.appointmentFee}
+											</Box>
+											<Box
+												component="td"
+												sx={{
+													...cellSx(isLast),
+													textAlign: "right",
+													fontFamily: MONO,
+													fontVariantNumeric: "tabular-nums",
+													color: rating === "—" ? "text.secondary" : "text.primary",
+												}}
+											>
+												{rating}
+											</Box>
+											<Box component="td" sx={cellSx(isLast)}>
+												<StatusBadge kind="active" label="Active" />
+											</Box>
+											<Box
+												component="td"
+												sx={{ ...cellSx(isLast), textAlign: "right" }}
+											>
+												<Stack
+													direction="row"
+													sx={{ gap: 0.75, justifyContent: "flex-end" }}
+												>
+													<ActionLink primary onClick={() => openEdit(d)}>
+														Edit
 													</ActionLink>
-												))}
-											</Stack>
+													<ActionLink
+														danger
+														disabled={isDeleting}
+														onClick={() => handleDelete(d)}
+													>
+														Delete
+													</ActionLink>
+												</Stack>
+											</Box>
 										</Box>
-									</Box>
-								)
-							})}
+									)
+								})
+							)}
 						</Box>
 					</Box>
 				</Box>
@@ -457,16 +454,32 @@ const DoctorsPage = () => {
 						color: "text.secondary",
 					}}
 				>
-					<Box>Showing 1 — 6 of 240 doctors</Box>
+					<Box>
+						Showing {from} — {to} of {total} doctor{total === 1 ? "" : "s"}
+					</Box>
 					<Stack direction="row" sx={{ gap: 0.5 }}>
-						{pageButtons.map((p, i) => (
+						{[
+							{ label: "‹", disabled: currentPage <= 1, go: currentPage - 1 },
+							{
+								label: String(currentPage),
+								active: true,
+								go: currentPage,
+							},
+							{
+								label: "›",
+								disabled: currentPage >= pageCount,
+								go: currentPage + 1,
+							},
+						].map((p, i) => (
 							<Box
 								key={i}
 								component="button"
 								disabled={p.disabled}
+								onClick={() => !p.disabled && !p.active && setPage(p.go)}
 								sx={{
-									width: 30,
+									minWidth: 30,
 									height: 30,
+									px: 1,
 									borderRadius: "8px",
 									border: "none",
 									bgcolor: p.active ? "text.primary" : "transparent",
@@ -500,7 +513,11 @@ const DoctorsPage = () => {
 				</Stack>
 			</Box>
 
-			<DoctorFormModal open={modalOpen} onClose={closeModal} />
+			<DoctorFormModal
+				open={modalOpen}
+				onClose={closeModal}
+				doctor={editing ?? undefined}
+			/>
 		</>
 	)
 }

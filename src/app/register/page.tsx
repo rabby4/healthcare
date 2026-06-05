@@ -62,6 +62,9 @@ const RegisterPage = () => {
 				})
 				if (result?.data?.accessToken) {
 					storeUserInfo({ accessToken: result.data.accessToken })
+					// Full-page navigation so the proxy guard sees the fresh cookie.
+					window.location.assign("/dashboard")
+					return
 				} else {
 					router.push("/login")
 				}

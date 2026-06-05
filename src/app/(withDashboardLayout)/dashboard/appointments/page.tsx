@@ -1,102 +1,54 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
 import { Box, Button, Stack, Typography } from "@mui/material"
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined"
 import KeyboardArrowDownRoundedIcon from "@mui/icons-material/KeyboardArrowDownRounded"
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded"
+import dayjs from "dayjs"
 import { useState } from "react"
 
+import { useGetAllAppointmentsQuery } from "@/redux/api/appointmentApi"
 import AvatarGradient from "@/components/dashboard/shell/AvatarGradient"
 import PageHead from "@/components/dashboard/shell/PageHead"
 import StatusBadge, { StatusKind } from "@/components/dashboard/shell/StatusBadge"
 import { AvatarVariant, MONO, SHELL } from "@/components/dashboard/shell/tokens"
 
-type PaymentKind = StatusKind
-type Appointment = {
-	id: string
-	doctor: { name: string; initials: string; variant: AvatarVariant }
-	patient: string
-	when: string
-	status: { kind: StatusKind; label?: string }
-	payment: { kind: PaymentKind; label?: string }
-	amount: string
-	amountMuted?: boolean
+const filters: { label: string; status?: string }[] = [
+	{ label: "All" },
+	{ label: "Scheduled", status: "SCHEDULED" },
+	{ label: "In progress", status: "INPROGRESS" },
+	{ label: "Completed", status: "COMPLETED" },
+	{ label: "Cancelled", status: "CANCELLED" },
+]
+
+const statusKindMap: Record<string, StatusKind> = {
+	SCHEDULED: "scheduled",
+	INPROGRESS: "inprogress",
+	COMPLETED: "completed",
+	CANCELLED: "cancelled",
 }
 
-const appointments: Appointment[] = [
-	{
-		id: "#A-9241",
-		doctor: { name: "Dr. Asma Rahman", initials: "AR", variant: "teal" },
-		patient: "Farzana Rahman",
-		when: "Today · 11:00",
-		status: { kind: "scheduled" },
-		payment: { kind: "unpaid" },
-		amount: "৳ 1,500",
-	},
-	{
-		id: "#A-9238",
-		doctor: { name: "Dr. Mehnaz Iqbal", initials: "MI", variant: "purple" },
-		patient: "Shahriar Islam",
-		when: "Today · 10:30",
-		status: { kind: "inprogress" },
-		payment: { kind: "paid" },
-		amount: "৳ 1,400",
-	},
-	{
-		id: "#A-9230",
-		doctor: { name: "Dr. Sadia Khan", initials: "SK", variant: "orange" },
-		patient: "Nadia Ahmed",
-		when: "Today · 09:00",
-		status: { kind: "completed" },
-		payment: { kind: "paid" },
-		amount: "৳ 900",
-	},
-	{
-		id: "#A-9221",
-		doctor: { name: "Dr. Tanvir Hossain", initials: "TH", variant: "blue" },
-		patient: "Rahim Uddin",
-		when: "Yest. · 16:30",
-		status: { kind: "completed" },
-		payment: { kind: "paid" },
-		amount: "৳ 1,200",
-	},
-	{
-		id: "#A-9215",
-		doctor: { name: "Dr. Rumana Nasir", initials: "RN", variant: "orange" },
-		patient: "Tasneem Karim",
-		when: "Yest. · 14:00",
-		status: { kind: "cancelled" },
-		payment: { kind: "neutral", label: "Refunded" },
-		amount: "৳ 1,100",
-	},
-	{
-		id: "#A-9209",
-		doctor: { name: "Dr. Asma Rahman", initials: "AR", variant: "teal" },
-		patient: "Mahmuda Akter",
-		when: "26 May · 11:30",
-		status: { kind: "completed" },
-		payment: { kind: "paid" },
-		amount: "৳ 1,500",
-	},
-	{
-		id: "#A-9201",
-		doctor: { name: "Dr. Mehnaz Iqbal", initials: "MI", variant: "purple" },
-		patient: "Imran Hossain",
-		when: "26 May · 09:30",
-		status: { kind: "cancelled" },
-		payment: { kind: "unpaid", label: "Auto-freed" },
-		amount: "—",
-		amountMuted: true,
-	},
-]
+const paymentKindMap: Record<string, StatusKind> = {
+	PAID: "paid",
+	UNPAID: "unpaid",
+}
 
-const filters = [
-	{ label: "All", count: "3,128" },
-	{ label: "Scheduled", count: "1,814" },
-	{ label: "In progress", count: "251" },
-	{ label: "Completed", count: "750" },
-	{ label: "Cancelled", count: "313" },
-]
+const avatarVariants: AvatarVariant[] = ["teal", "blue", "purple", "orange", "green"]
+
+const getInitials = (name?: string) => {
+	if (!name) return "?"
+	const parts = name.trim().split(/\s+/).filter(Boolean)
+	if (parts.length === 0) return "?"
+	if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
+	return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+}
+
+const getVariant = (key: string): AvatarVariant => {
+	let hash = 0
+	for (let i = 0; i < key.length; i++) hash = (hash + key.charCodeAt(i)) % avatarVariants.length
+	return avatarVariants[hash]
+}
 
 const headers = ["ID", "Doctor", "Patient", "Date & time", "Status", "Payment", "Amount"]
 
@@ -110,12 +62,29 @@ const cellSx = (last: boolean) => ({
 
 const AppointmentsPage = () => {
 	const [activeFilter, setActiveFilter] = useState("All")
+	const [patientEmail, setPatientEmail] = useState("")
+
+	const activeStatus = filters.find((f) => f.label === activeFilter)?.status
+
+	const queryArg: Record<string, any> = {}
+	if (activeStatus) queryArg.status = activeStatus
+	if (patientEmail.trim()) queryArg.patientEmail = patientEmail.trim()
+
+	const { data, isLoading, isError } = useGetAllAppointmentsQuery(queryArg)
+	const appointments: any[] = data?.appointments ?? []
+	const meta = data?.meta
+
+	const rangeStart = meta?.total ? ((meta.page ?? 1) - 1) * (meta.limit ?? appointments.length) + 1 : 0
+	const rangeEnd = meta?.total
+		? Math.min((meta.page ?? 1) * (meta.limit ?? appointments.length), meta.total)
+		: appointments.length
+	const total = meta?.total ?? appointments.length
 
 	return (
 		<>
 			<PageHead
 				title="All appointments"
-				subtitle="3,128 total this month · filter by doctor, patient, status, or payment."
+				subtitle="Filter by status or search by patient email."
 				actions={
 					<Button
 						variant="outlined"
@@ -167,17 +136,6 @@ const AppointmentsPage = () => {
 							}}
 						>
 							{f.label}
-							<Box
-								component="span"
-								sx={{
-									fontFamily: MONO,
-									fontSize: 12,
-									opacity: 0.6,
-									fontVariantNumeric: "tabular-nums",
-								}}
-							>
-								{f.count}
-							</Box>
 						</Box>
 					)
 				})}
@@ -223,7 +181,9 @@ const AppointmentsPage = () => {
 						<SearchRoundedIcon sx={{ fontSize: 16 }} />
 						<Box
 							component="input"
-							placeholder="Search by doctor or patient email…"
+							value={patientEmail}
+							onChange={(e: any) => setPatientEmail(e.target.value)}
+							placeholder="Search by patient email…"
 							sx={{
 								flex: 1,
 								bgcolor: "transparent",
@@ -290,64 +250,116 @@ const AppointmentsPage = () => {
 							</Box>
 						</Box>
 						<Box component="tbody">
-							{appointments.map((a, i) => {
-								const isLast = i === appointments.length - 1
-								return (
-									<Box
-										key={a.id}
-										component="tr"
-										sx={{ "&:hover td": { bgcolor: SHELL.bgSoft } }}
-									>
+							{isLoading ? (
+								[0, 1, 2, 3, 4].map((r) => (
+									<Box key={r} component="tr">
 										<Box
 											component="td"
+											colSpan={headers.length}
 											sx={{
-												...cellSx(isLast),
-												fontFamily: MONO,
-												fontSize: 12,
+												...cellSx(r === 4),
 												color: "text.secondary",
-												fontVariantNumeric: "tabular-nums",
+												fontSize: 13,
 											}}
 										>
-											{a.id}
-										</Box>
-										<Box component="td" sx={cellSx(isLast)}>
-											<Stack direction="row" sx={{ alignItems: "center", gap: 1 }}>
-												<AvatarGradient
-													initials={a.doctor.initials}
-													variant={a.doctor.variant}
-													size={28}
-												/>
-												<Typography sx={{ fontSize: 13, color: "text.primary" }}>
-													{a.doctor.name}
-												</Typography>
-											</Stack>
-										</Box>
-										<Box component="td" sx={cellSx(isLast)}>
-											{a.patient}
-										</Box>
-										<Box component="td" sx={cellSx(isLast)}>
-											{a.when}
-										</Box>
-										<Box component="td" sx={cellSx(isLast)}>
-											<StatusBadge kind={a.status.kind} label={a.status.label} />
-										</Box>
-										<Box component="td" sx={cellSx(isLast)}>
-											<StatusBadge kind={a.payment.kind} label={a.payment.label} />
-										</Box>
-										<Box
-											component="td"
-											sx={{
-												...cellSx(isLast),
-												textAlign: "right",
-												fontVariantNumeric: "tabular-nums",
-												color: a.amountMuted ? "text.secondary" : "text.primary",
-											}}
-										>
-											{a.amount}
+											Loading…
 										</Box>
 									</Box>
-								)
-							})}
+								))
+							) : isError ? (
+								<Box component="tr">
+									<Box
+										component="td"
+										colSpan={headers.length}
+										sx={{
+											...cellSx(true),
+											textAlign: "center",
+											color: SHELL.urgent,
+											py: "32px",
+										}}
+									>
+										Failed to load appointments. Please try again.
+									</Box>
+								</Box>
+							) : appointments.length === 0 ? (
+								<Box component="tr">
+									<Box
+										component="td"
+										colSpan={headers.length}
+										sx={{
+											...cellSx(true),
+											textAlign: "center",
+											color: "text.secondary",
+											py: "32px",
+										}}
+									>
+										No appointments found.
+									</Box>
+								</Box>
+							) : (
+								appointments.map((a, i) => {
+									const isLast = i === appointments.length - 1
+									const doctorName: string | undefined = a.doctor?.name
+									const statusKind = statusKindMap[a.status] ?? "neutral"
+									const paymentKind = paymentKindMap[a.paymentStatus] ?? "neutral"
+									const fee = a.doctor?.appointmentFee
+									return (
+										<Box
+											key={a.id}
+											component="tr"
+											sx={{ "&:hover td": { bgcolor: SHELL.bgSoft } }}
+										>
+											<Box
+												component="td"
+												sx={{
+													...cellSx(isLast),
+													fontFamily: MONO,
+													fontSize: 12,
+													color: "text.secondary",
+													fontVariantNumeric: "tabular-nums",
+												}}
+											>
+												{"#" + String(a.id).slice(0, 8)}
+											</Box>
+											<Box component="td" sx={cellSx(isLast)}>
+												<Stack direction="row" sx={{ alignItems: "center", gap: 1 }}>
+													<AvatarGradient
+														initials={getInitials(doctorName)}
+														variant={getVariant(doctorName ?? a.id)}
+														size={28}
+													/>
+													<Typography sx={{ fontSize: 13, color: "text.primary" }}>
+														{doctorName ?? "—"}
+													</Typography>
+												</Stack>
+											</Box>
+											<Box component="td" sx={cellSx(isLast)}>
+												{a.patient?.name ?? "—"}
+											</Box>
+											<Box component="td" sx={cellSx(isLast)}>
+												{a.createdAt ? dayjs(a.createdAt).format("D MMM YYYY · HH:mm") : "—"}
+											</Box>
+											<Box component="td" sx={cellSx(isLast)}>
+												<StatusBadge kind={statusKind} />
+											</Box>
+											<Box component="td" sx={cellSx(isLast)}>
+												<StatusBadge kind={paymentKind} />
+											</Box>
+											<Box
+												component="td"
+												sx={{
+													...cellSx(isLast),
+													textAlign: "right",
+													fontVariantNumeric: "tabular-nums",
+													color: fee == null ? "text.secondary" : "text.primary",
+												}}
+											>
+												{"৳ " + (fee ?? "—")}
+											</Box>
+										</Box>
+									)
+								})
+							)}
 						</Box>
 					</Box>
 				</Box>
@@ -365,51 +377,11 @@ const AppointmentsPage = () => {
 						color: "text.secondary",
 					}}
 				>
-					<Box>Showing 1 — 7 of 3,128 appointments</Box>
-					<Stack direction="row" sx={{ gap: 0.5 }}>
-						{[
-							{ label: "‹", disabled: true },
-							{ label: "1", active: true },
-							{ label: "2" },
-							{ label: "3" },
-							{ label: "…", disabled: true },
-							{ label: "447" },
-							{ label: "›" },
-						].map((p, i) => (
-							<Box
-								key={i}
-								component="button"
-								disabled={p.disabled}
-								sx={{
-									minWidth: 30,
-									height: 30,
-									px: 1,
-									borderRadius: "8px",
-									border: "none",
-									bgcolor: p.active ? "text.primary" : "transparent",
-									color: p.active
-										? "#fff"
-										: p.disabled
-											? "divider"
-											: "text.secondary",
-									fontSize: 12,
-									fontFamily: MONO,
-									cursor: p.disabled ? "not-allowed" : "pointer",
-									fontVariantNumeric: "tabular-nums",
-									"&:hover": {
-										bgcolor: p.active
-											? "text.primary"
-											: p.disabled
-												? "transparent"
-												: SHELL.bgSoft,
-										color: p.active ? "#fff" : p.disabled ? "divider" : "text.primary",
-									},
-								}}
-							>
-								{p.label}
-							</Box>
-						))}
-					</Stack>
+					<Box>
+						{appointments.length === 0
+							? "Showing 0 of 0 appointments"
+							: `Showing ${rangeStart} — ${rangeEnd} of ${total} appointments`}
+					</Box>
 				</Stack>
 			</Box>
 		</>
