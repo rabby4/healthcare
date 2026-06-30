@@ -22,7 +22,8 @@ export interface IDoctor {
 	appointmentFee: number
 	qualification: string
 	currentWorkingPlace: string
-	designation: string
+	/** @deprecated legacy column — doctors are described by their specialties now */
+	designation?: string
 	isDeleted: boolean
 	createdAt: string
 	updatedAt: string

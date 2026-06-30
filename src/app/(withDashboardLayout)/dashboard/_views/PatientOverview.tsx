@@ -57,7 +57,6 @@ const relativeLabel = (start: string): string => {
 const doctorSpecialty = (doctor: any): string => {
 	const title = doctor?.doctorSpecialties?.[0]?.specialties?.title
 	if (title) return title
-	if (doctor?.designation) return doctor.designation
 	return "General practitioner"
 }
 
@@ -478,7 +477,7 @@ const PatientOverview = () => {
 										}}
 									>
 										{dayjs(nextAppt.schedule.startDateTime).format("ddd D MMM")} ·{" "}
-										{dayjs(nextAppt.schedule.startDateTime).format("HH:mm")} —{" "}
+										{dayjs(nextAppt.schedule.startDateTime).format("HH:mm")} to{" "}
 										{dayjs(nextAppt.schedule.endDateTime).format("HH:mm")} ·{" "}
 										{relativeLabel(nextAppt.schedule.startDateTime)}
 									</Typography>

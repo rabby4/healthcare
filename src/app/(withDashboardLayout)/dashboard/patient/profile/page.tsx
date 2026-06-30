@@ -534,7 +534,7 @@ const PatientProfilePage = () => {
 						mb: 3,
 					}}
 				>
-					We couldn&apos;t load your health record. Some sections may be empty —
+					We couldn&apos;t load your health record. Some sections may be empty,
 					try refreshing the page.
 				</Box>
 			)}
@@ -546,7 +546,7 @@ const PatientProfilePage = () => {
 					title="Personal information"
 					headRight={
 						<Box sx={eyebrowSx}>
-							Patient ID — {account?.id?.slice(0, 8) ?? "—"}
+							Patient ID · {account?.id?.slice(0, 8) ?? "—"}
 						</Box>
 					}
 				>
@@ -648,7 +648,7 @@ const PatientProfilePage = () => {
 						<Field
 							label="Email"
 							value={account?.email ?? ""}
-							help="Email is your login — contact support to change."
+							help="Email is your login. Contact support to change."
 							slotProps={{
 								input: {
 									readOnly: true,
@@ -846,7 +846,7 @@ const PatientProfilePage = () => {
 							label="Immunization status"
 							value={health.immunizationStatus}
 							onChange={(e) => setH("immunizationStatus", e.target.value)}
-							placeholder="e.g. COVID — 3 doses, Hepatitis B, Tetanus (2024)"
+							placeholder="e.g. COVID (3 doses), Hepatitis B, Tetanus (2024)"
 						/>
 						<Box>
 							<Box component="label" sx={labelSx}>
@@ -860,7 +860,7 @@ const PatientProfilePage = () => {
 								onChange={(e) =>
 									setH("mentalHealthHistory", e.target.value)
 								}
-								placeholder="Optional — only share what you're comfortable with."
+								placeholder="Optional. Only share what you're comfortable with."
 							/>
 						</Box>
 					</Stack>
@@ -885,7 +885,7 @@ const PatientProfilePage = () => {
 								No reports yet
 							</Typography>
 							<Typography sx={{ fontSize: 12, mt: 0.5 }}>
-								Add a report by link below — your doctor can view it during
+								Add a report by link below, your doctor can view it during
 								consultations.
 							</Typography>
 						</Box>
@@ -994,7 +994,7 @@ const PatientProfilePage = () => {
 								label="Report name"
 								value={reportName}
 								onChange={(e) => setReportName(e.target.value)}
-								placeholder="Lipid profile — Apr 2026"
+								placeholder="Lipid profile, Apr 2026"
 							/>
 							<Field
 								label="Report link (URL)"
@@ -1033,7 +1033,7 @@ const PatientProfilePage = () => {
 							</Button>
 						</Box>
 						<Typography sx={{ fontSize: 11, color: "text.secondary", mt: 1.5 }}>
-							Direct file upload, download and delete aren&apos;t wired yet —
+							Direct file upload, download and delete aren&apos;t wired yet,
 							paste a hosted link instead.
 							<DemoTag />
 						</Typography>

@@ -16,7 +16,7 @@ const items = [
 	{
 		Icon: LockRoundedIcon,
 		title: "Secure SSLCommerz payments",
-		desc: "Cards, bKash, Nagad, bank transfers — all routed through SSLCommerz. No card data ever touches our servers.",
+		desc: "Cards, bKash, Nagad, bank transfers, all routed through SSLCommerz. No card data ever touches our servers.",
 	},
 	{
 		Icon: VideocamRoundedIcon,
@@ -31,12 +31,12 @@ const items = [
 	{
 		Icon: ScheduleRoundedIcon,
 		title: "30-minute slot guarantee",
-		desc: "Slots are held for 30 minutes while you pay. If you don't make it, the slot auto-frees — no being charged for what you didn't get.",
+		desc: "Slots are held for 30 minutes while you pay. If you don't make it, the slot auto-frees, no being charged for what you didn't get.",
 	},
 	{
 		Icon: PublicRoundedIcon,
 		title: "Care anywhere in Bangladesh",
-		desc: "From Dhaka to a tea garden in Sylhet — if you have signal, you have a doctor. No travel, no queues, no chamber fees.",
+		desc: "From Dhaka to a tea garden in Sylhet, if you have signal, you have a doctor. No travel, no queues, no chamber fees.",
 	},
 ]
 

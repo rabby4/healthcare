@@ -84,7 +84,7 @@ const DoctorScheduleSlots = ({ id }: { id: string }) => {
 			toast.error(
 				err?.data?.message ||
 					err?.message ||
-					"Could not book — please try again"
+					"Could not book, please try again"
 			)
 		}
 	}
@@ -192,7 +192,7 @@ const DoctorScheduleSlots = ({ id }: { id: string }) => {
 							No available slots right now
 						</Typography>
 						<Typography sx={{ color: "text.secondary", mt: 0.75 }}>
-							Check back soon — new schedules are added regularly.
+							Check back soon. New schedules are added regularly.
 						</Typography>
 					</Box>
 				)}

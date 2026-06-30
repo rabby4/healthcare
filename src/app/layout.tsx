@@ -17,7 +17,7 @@ const jetBrainsMono = JetBrains_Mono({
 })
 
 export const metadata: Metadata = {
-	title: "Medicare — Care, delivered.",
+	title: "Medicare · Care, delivered.",
 	description:
 		"Book verified specialists online, pay securely, meet over encrypted video, and get a digital prescription.",
 }

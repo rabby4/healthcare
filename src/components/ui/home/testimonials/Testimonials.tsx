@@ -12,7 +12,7 @@ const testimonials = [
 	},
 	{
 		quote:
-			"My daughter spiked a fever on a Saturday night. We had a pediatrician on video in twelve minutes — no clinic dash, no panic.",
+			"My daughter spiked a fever on a Saturday night. We had a pediatrician on video in twelve minutes, no clinic dash, no panic.",
 		initials: "SI",
 		name: "Shahriar I.",
 		meta: "Patient · Chittagong",
@@ -20,7 +20,7 @@ const testimonials = [
 	},
 	{
 		quote:
-			"It feels like a real clinic visit — but better. The doctor pulled up my reports right there, walked me through everything, and I had a follow-up booked in seconds.",
+			"It feels like a real clinic visit, but better. The doctor pulled up my reports right there, walked me through everything, and I had a follow-up booked in seconds.",
 		initials: "NA",
 		name: "Nadia A.",
 		meta: "Patient · Sylhet",

@@ -74,13 +74,12 @@ const variantFor = (key?: string): AvatarVariant => {
 }
 
 // Patient appointment rows include `doctor: true` (flat) + `schedule: true`.
-// Specialty is NOT included on patient rows, so we fall back to designation.
 const doctorSpecialty = (doctor: any): string => {
 	const fromSpecialties = doctor?.doctorSpecialties
 		?.map((ds: any) => ds?.specialties?.title)
 		.filter(Boolean)
 		.join(", ")
-	return fromSpecialties || doctor?.designation || "Doctor"
+	return fromSpecialties || "Doctor"
 }
 
 const relativeWhen = (start: dayjs.Dayjs): string => {
@@ -264,7 +263,7 @@ const PatientAppointmentsPage = () => {
 
 	const subtitle = isLoading
 		? "Loading your consultations…"
-		: `Manage all your consultations — upcoming, past, and cancelled. ${total} total.`
+		: `Manage all your consultations: upcoming, past, and cancelled. ${total} total.`
 
 	const tabs: { key: StatusTab; label: string; count: number }[] = [
 		{ key: "upcoming", label: "Upcoming", count: counts.upcoming },
@@ -557,7 +556,7 @@ const PatientAppointmentsPage = () => {
 										{a?.schedule?.startDateTime && a?.schedule?.endDateTime
 											? `${getTimeIn12HourFormat(
 													a.schedule.startDateTime,
-												)} — ${getTimeIn12HourFormat(a.schedule.endDateTime)}`
+												)} to ${getTimeIn12HourFormat(a.schedule.endDateTime)}`
 											: "—"}
 									</Typography>
 									{relativeWhen(start) && (
@@ -720,7 +719,7 @@ const PatientAppointmentsPage = () => {
 						}}
 					>
 						<Typography sx={{ fontSize: 12, color: "text.secondary" }}>
-							Showing {(page - 1) * PER_PAGE + 1} — {Math.min(page * PER_PAGE, filtered.length)} of{" "}
+							Showing {(page - 1) * PER_PAGE + 1} to {Math.min(page * PER_PAGE, filtered.length)} of{" "}
 							{filtered.length} appointment{filtered.length === 1 ? "" : "s"}
 						</Typography>
 						{pageCount > 1 && (

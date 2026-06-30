@@ -116,7 +116,7 @@ const DoctorSchedulePage = () => {
 		<Box>
 			<PageHead
 				title="My schedules"
-				subtitle="Claim admin-published consultation slots. Booked slots are locked — patients see them as unavailable until the appointment is done."
+				subtitle="Claim admin-published consultation slots. Booked slots are locked, patients see them as unavailable until the appointment is done."
 			/>
 
 			{/* Claim availability feature card */}

@@ -134,7 +134,7 @@ const ClaimAvailabilityCard = ({ startDate, endDate }: TProps) => {
 							fontSize: 14,
 						}}
 					>
-						Doctors cannot generate global slots — those are created by the
+						Doctors cannot generate global slots, those are created by the
 						admin. Pick the slots you want to be bookable for and claim them.
 						They become available to patients the moment you claim.
 					</Typography>

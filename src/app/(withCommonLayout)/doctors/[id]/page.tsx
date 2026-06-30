@@ -154,10 +154,9 @@ const DoctorsProfilePage = async ({ params }: PropTypes) => {
 							{doctor?.name}
 						</Typography>
 
-						{doctor?.designation && (
+						{doctor?.qualification && (
 							<Typography sx={{ color: "text.secondary", fontSize: 16 }}>
-								{doctor.designation}
-								{doctor?.qualification ? ` · ${doctor.qualification}` : ""}
+								{doctor.qualification}
 							</Typography>
 						)}
 
@@ -295,7 +294,7 @@ const DoctorsProfilePage = async ({ params }: PropTypes) => {
 					}}
 				>
 					{doctor?.name} is a compassionate and dedicated{" "}
-					{doctor?.designation || "specialist"} committed to delivering
+					{specialties[0] || "specialist"} committed to delivering
 					high-quality, patient-centered care. With{" "}
 					{doctor?.experience ?? 0}+ years of experience, they focus on
 					accurate diagnosis, effective treatment, and advocating for your

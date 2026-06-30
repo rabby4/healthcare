@@ -37,7 +37,7 @@ const CONFIG: Record<string, StatusConfig> = {
 		eyebrow: "Payment · Confirmed",
 		title: "Payment successful",
 		message:
-			"Your appointment is confirmed and your slot is secured. You'll find it — along with the join link — in your appointments.",
+			"Your appointment is confirmed and your slot is secured. You'll find it, along with the join link, in your appointments.",
 		icon: <CheckCircleRoundedIcon sx={{ fontSize: 44 }} />,
 		accent: "#0E7C7B",
 		tint: "#E6F2F1",
@@ -60,7 +60,7 @@ const CONFIG: Record<string, StatusConfig> = {
 		eyebrow: "Payment · Cancelled",
 		title: "Payment cancelled",
 		message:
-			"You cancelled before completing payment, so nothing was charged. Your slot is held briefly — finish payment soon, or pick another time.",
+			"You cancelled before completing payment, so nothing was charged. Your slot is held briefly. Finish payment soon, or pick another time.",
 		icon: <HighlightOffRoundedIcon sx={{ fontSize: 44 }} />,
 		accent: "#B5811C",
 		tint: "#FFF3D6",
@@ -78,7 +78,7 @@ const CONFIG: Record<string, StatusConfig> = {
 		eyebrow: "Payment · Failed",
 		title: "Payment failed",
 		message:
-			"We couldn't process your payment, so you haven't been charged. This is usually a temporary card or network issue — please try again.",
+			"We couldn't process your payment, so you haven't been charged. This is usually a temporary card or network issue. Please try again.",
 		icon: <ErrorOutlineRoundedIcon sx={{ fontSize: 44 }} />,
 		accent: "#D9624A",
 		tint: "#FDE9E4",

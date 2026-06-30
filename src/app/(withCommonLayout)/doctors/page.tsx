@@ -140,7 +140,7 @@ const DoctorsContent = () => {
 					fullWidth
 					value={searchTerm}
 					onChange={(e) => setSearchTerm(e.target.value)}
-					placeholder="Search by doctor name, designation or workplace..."
+					placeholder="Search by doctor name or workplace..."
 					slotProps={{
 						input: {
 							startAdornment: (

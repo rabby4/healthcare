@@ -136,7 +136,7 @@ const SchedulesPage = () => {
 						Generated slots
 					</Typography>
 					<Typography sx={{ fontSize: 13, color: "text.secondary" }}>
-						{dayjs(startDate).format("DD MMM")} — {dayjs(endDate).format("DD MMM")}
+						{dayjs(startDate).format("DD MMM")} to {dayjs(endDate).format("DD MMM")}
 					</Typography>
 				</Stack>
 
@@ -285,7 +285,7 @@ const SchedulesPage = () => {
 					}}
 				>
 					<Box>
-						Showing {rangeStart} — {rangeEnd} of {total} slots
+						Showing {rangeStart} to {rangeEnd} of {total} slots
 					</Box>
 					<Stack direction="row" sx={{ gap: 0.5 }}>
 						{Array.from({ length: pageCount }, (_, idx) => idx + 1)

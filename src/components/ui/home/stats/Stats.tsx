@@ -15,7 +15,7 @@ const Stats = () => {
 				<SectionHead
 					light
 					eyebrow="By the numbers"
-					title="Quiet, careful work — at scale."
+					title="Quiet, careful work at scale."
 				/>
 
 				<Box

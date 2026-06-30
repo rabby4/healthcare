@@ -80,7 +80,7 @@ const REVIEW_DEMO = [
 	},
 	{
 		rating: 5,
-		text: "Felt seen and heard. Followed up next day to check on me — really kind. Highly recommend.",
+		text: "Felt seen and heard. Followed up next day to check on me, really kind. Highly recommend.",
 		name: "Nadia A.",
 		date: "14 May 2026",
 		variant: "purple" as const,
@@ -473,7 +473,7 @@ const DoctorOverview = () => {
 									}}
 								>
 									Today ·{" "}
-									{dayjs(upNext.schedule.startDateTime).format("HH:mm")} —{" "}
+									{dayjs(upNext.schedule.startDateTime).format("HH:mm")} to{" "}
 									{dayjs(upNext.schedule.endDateTime).format("HH:mm")} ·{" "}
 									{relativeLabel(upNext.schedule.startDateTime)}
 								</Typography>
@@ -632,7 +632,7 @@ const DoctorOverview = () => {
 					}
 				/>
 				<Typography sx={{ fontSize: 12, color: "text.secondary", mb: 2 }}>
-					Illustrative — not live. Review reading is not yet available from the backend.
+					Illustrative, not live. Review reading is not yet available from the backend.
 				</Typography>
 				<Box
 					sx={{

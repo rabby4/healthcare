@@ -301,7 +301,7 @@ const Overview = ({ role }: { role: "ADMIN" | "SUPER_ADMIN" }) => {
 		<>
 			<PageHead
 				title="Platform overview"
-				subtitle="Everything in one place — live counts and appointment trends."
+				subtitle="Everything in one place: live counts and appointment trends."
 				actions={
 					// Admin management lives on /dashboard/admins, which only super
 					// admins can open (proxy-guarded) — so admins see no admin actions.
@@ -558,7 +558,7 @@ const Overview = ({ role }: { role: "ADMIN" | "SUPER_ADMIN" }) => {
 					</Stack>
 					<Typography sx={{ fontSize: 11, color: "text.secondary", mt: 1.25 }}>
 						{commissionPct != null
-							? `Platform keeps ${commissionPct}% of each paid fee — doctors receive the rest.`
+							? `Platform keeps ${commissionPct}% of each paid fee, doctors receive the rest.`
 							: "Platform commission is deducted from each paid fee."}
 					</Typography>
 				</Box>
@@ -846,7 +846,7 @@ const Overview = ({ role }: { role: "ADMIN" | "SUPER_ADMIN" }) => {
 						<DemoChip />
 					</Stack>
 					<Typography sx={{ fontSize: 11, color: "text.secondary", mb: 2 }}>
-						Illustrative — not live.
+						Illustrative, not live.
 					</Typography>
 					<Stack sx={{ flexDirection: "column" }}>
 						{systemHealth.map((s, i) => (
@@ -911,7 +911,7 @@ const Overview = ({ role }: { role: "ADMIN" | "SUPER_ADMIN" }) => {
 					</Stack>
 				</Stack>
 				<Typography sx={{ fontSize: 11, color: "text.secondary", mb: 2 }}>
-					Illustrative — audit log is not live.
+					Illustrative, audit log is not live.
 				</Typography>
 				<Stack>
 					{audit.map((a, i) => (

@@ -669,7 +669,7 @@ const DetailPane = ({ appt, isStatusChanging, onStatusChange, onWriteRx }: Detai
 					</Button>
 				</Stack>
 				<Typography sx={{ fontSize: 11, color: "text.disabled", mt: 1, fontStyle: "italic" }}>
-					Video join screen — Demo (not live)
+					Video join screen · Demo (not live)
 				</Typography>
 			</Card>
 
@@ -875,7 +875,7 @@ const DetailPane = ({ appt, isStatusChanging, onStatusChange, onWriteRx }: Detai
 						: "Available once the appointment is Completed and Paid."}
 				</Typography>
 				<Typography sx={{ fontSize: 11, color: "text.disabled", mt: 0.5, fontStyle: "italic" }}>
-					Reading past prescriptions — Demo (not live)
+					Reading past prescriptions · Demo (not live)
 				</Typography>
 			</Card>
 		</Stack>

@@ -183,7 +183,7 @@ const UsersPage = () => {
 		<>
 			<PageHead
 				title="Users"
-				subtitle="Manage account status across patients and doctors — active, blocked, or deleted."
+				subtitle="Manage account status across patients and doctors: active, blocked, or deleted."
 			/>
 
 			{/* Filter pills */}
@@ -444,7 +444,7 @@ const UsersPage = () => {
 					}}
 				>
 					<Box>
-						Showing {startIdx} — {endIdx} of {total} users
+						Showing {startIdx} to {endIdx} of {total} users
 					</Box>
 					<Stack direction="row" sx={{ gap: 0.5 }}>
 						{[

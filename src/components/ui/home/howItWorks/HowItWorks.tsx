@@ -7,25 +7,25 @@ import { MONO, SectionHead } from "../SectionHead"
 
 const steps = [
 	{
-		num: "01 — FIND",
+		num: "01 · FIND",
 		title: "Search by specialty.",
 		desc: "Filter by fee, rating, or years of experience. See live availability for the next 7 days.",
 		Icon: SearchRoundedIcon,
 	},
 	{
-		num: "02 — BOOK",
+		num: "02 · BOOK",
 		title: "Pick a 30-min slot.",
-		desc: "One tap to reserve. Your slot is held for 30 minutes while you confirm payment — then it's yours.",
+		desc: "One tap to reserve. Your slot is held for 30 minutes while you confirm payment, then it's yours.",
 		Icon: CalendarMonthRoundedIcon,
 	},
 	{
-		num: "03 — CONSULT",
+		num: "03 · CONSULT",
 		title: "Meet over secure video.",
 		desc: "Encrypted Agora video call. Share medical reports and chat alongside the conversation.",
 		Icon: VideocamRoundedIcon,
 	},
 	{
-		num: "04 — PRESCRIPTION",
+		num: "04 · PRESCRIPTION",
 		title: "Get a signed Rx.",
 		desc: "Digital prescription delivered to your dashboard. Download as PDF. Follow-up booked in one tap.",
 		Icon: DescriptionRoundedIcon,
@@ -39,7 +39,7 @@ const HowItWorks = () => {
 				<SectionHead
 					eyebrow="How it works"
 					title="From search to prescription in four steps."
-					sub="A complete telemedicine flow, designed to feel like booking a ride — not navigating a hospital."
+					sub="A complete telemedicine flow, designed to feel like booking a ride, not navigating a hospital."
 				/>
 
 				<Box

@@ -8,7 +8,7 @@ const faqs = [
 	},
 	{
 		q: "What if I miss my payment window?",
-		a: "The slot is automatically freed and you're not charged. You can re-book any available time — we'll never bill you for an appointment you didn't actually keep.",
+		a: "The slot is automatically freed and you're not charged. You can re-book any available time, we'll never bill you for an appointment you didn't actually keep.",
 	},
 	{
 		q: "How does the video call work?",
@@ -16,7 +16,7 @@ const faqs = [
 	},
 	{
 		q: "Can I get a prescription?",
-		a: "Yes — when clinically appropriate. Your doctor issues a signed digital prescription right after the consultation, downloadable as PDF from your dashboard.",
+		a: "Yes, when clinically appropriate. Your doctor issues a signed digital prescription right after the consultation, downloadable as PDF from your dashboard.",
 	},
 	{
 		q: "Is my data private?",
@@ -24,7 +24,7 @@ const faqs = [
 	},
 	{
 		q: "Which payment methods work?",
-		a: "All major cards, bKash, Nagad, and bank transfers — processed securely through SSLCommerz. We never see or store your payment details.",
+		a: "All major cards, bKash, Nagad, and bank transfers, processed securely through SSLCommerz. We never see or store your payment details.",
 	},
 ]
 

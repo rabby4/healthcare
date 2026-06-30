@@ -455,7 +455,7 @@ const DoctorsPage = () => {
 					}}
 				>
 					<Box>
-						Showing {from} — {to} of {total} doctor{total === 1 ? "" : "s"}
+						Showing {from} to {to} of {total} doctor{total === 1 ? "" : "s"}
 					</Box>
 					<Stack direction="row" sx={{ gap: 0.5 }}>
 						{[

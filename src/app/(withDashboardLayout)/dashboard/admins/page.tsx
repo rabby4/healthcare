@@ -285,7 +285,7 @@ const AdminsPage = () => {
 								: isError
 									? messageRow("Failed to load admins. Please try again.", SHELL.urgent)
 									: admins.length === 0
-										? messageRow("No admins yet — invite one")
+										? messageRow("No admins yet. Invite one")
 										: admins.map((a, i) => {
 												const isLast = i === admins.length - 1
 												const isYou = !!currentEmail && a.email === currentEmail
@@ -390,7 +390,7 @@ const AdminsPage = () => {
 					<Box>
 						{total === 0
 							? "No admins"
-							: `Showing ${from} — ${to} of ${total} admins`}
+							: `Showing ${from} to ${to} of ${total} admins`}
 					</Box>
 					<Stack direction="row" sx={{ gap: 0.5 }}>
 						{[

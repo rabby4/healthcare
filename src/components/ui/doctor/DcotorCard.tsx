@@ -96,8 +96,9 @@ const DoctorCard = ({ doctor }: { doctor: IDoctor }) => {
 						{doctor?.name}
 					</Typography>
 					<Typography sx={{ fontSize: 13, color: "text.secondary", mt: 0.5 }}>
-						{doctor?.designation}
-						{doctor?.qualification ? ` · ${doctor.qualification}` : ""}
+						{[specialtyTitles[0], doctor?.qualification]
+							.filter(Boolean)
+							.join(" · ") || "Doctor"}
 					</Typography>
 					<Stack
 						direction="row"

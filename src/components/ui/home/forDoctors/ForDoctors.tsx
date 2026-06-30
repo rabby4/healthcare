@@ -6,7 +6,7 @@ const perks = [
 	"Build your weekly availability in minutes",
 	"Patient health data + reports ready before the call",
 	"Weekly payouts, transparent breakdown",
-	"Earn from anywhere — no chamber required",
+	"Earn from anywhere, no chamber required",
 ]
 
 const earnings = [

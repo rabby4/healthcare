@@ -56,7 +56,7 @@ const SpecialtiesPage = () => {
 			await deleteSpecialty(id).unwrap()
 			toast.success("Specialty deleted")
 		} catch {
-			toast.error("Cannot delete — specialty is in use by a doctor")
+			toast.error("Cannot delete: specialty is in use by a doctor")
 		}
 	}
 

@@ -380,7 +380,7 @@ const AppointmentsPage = () => {
 					<Box>
 						{appointments.length === 0
 							? "Showing 0 of 0 appointments"
-							: `Showing ${rangeStart} — ${rangeEnd} of ${total} appointments`}
+							: `Showing ${rangeStart} to ${rangeEnd} of ${total} appointments`}
 					</Box>
 				</Stack>
 			</Box>

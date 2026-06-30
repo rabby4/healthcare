@@ -1,9 +1,9 @@
-import { Box, Button, Container, Stack, Typography } from "@mui/material"
+import { Box, Container, Stack, Typography } from "@mui/material"
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded"
-import KeyboardArrowDownRoundedIcon from "@mui/icons-material/KeyboardArrowDownRounded"
 import CalendarMonthRoundedIcon from "@mui/icons-material/CalendarMonthRounded"
 import VideocamRoundedIcon from "@mui/icons-material/VideocamRounded"
 import { MONO } from "../SectionHead"
+import HeroSearch from "./HeroSearch"
 
 const trust = [
 	{ num: "240+", lbl: "verified doctors" },
@@ -17,29 +17,6 @@ const phoneCards = [
 	{ initials: "TH", name: "Dr. Tanvir Hossain", spec: "Cardiologist · MD", meta: "★ 4.8 · 11y exp", fee: "৳ 1,200", grad: "linear-gradient(135deg, #2A6FB5, #4A90D9)" },
 	{ initials: "MI", name: "Dr. Mehnaz Iqbal", spec: "Cardiologist · DM", meta: "★ 4.7 · 9y exp", fee: "৳ 1,000", grad: "linear-gradient(135deg, #7B4DA8, #A26CC8)" },
 ]
-
-const SearchField = ({ label, value }: { label: string; value: string }) => (
-	<Box
-		sx={{
-			px: 2,
-			py: 1.5,
-			borderRadius: "14px",
-			cursor: "pointer",
-			transition: "background 160ms",
-			"&:hover": { bgcolor: "secondary.light" },
-		}}
-	>
-		<Typography sx={{ fontSize: 11, color: "secondary.main", letterSpacing: "0.06em", textTransform: "uppercase", fontWeight: 500 }}>
-			{label}
-		</Typography>
-		<Stack direction="row" sx={{ alignItems: "center", gap: 0.75, mt: 0.5 }}>
-			<Typography sx={{ fontSize: 14, color: "text.primary", fontWeight: 500 }}>
-				{value}
-			</Typography>
-			<KeyboardArrowDownRoundedIcon sx={{ fontSize: 16, color: "secondary.main", ml: "auto" }} />
-		</Stack>
-	</Box>
-)
 
 const FloatCard = ({
 	icon,
@@ -133,32 +110,12 @@ const HeroSection = () => {
 
 						<Typography sx={{ mt: 3, maxWidth: 540, fontSize: { xs: 16, md: 19 }, lineHeight: 1.55, color: "text.secondary" }}>
 							Book verified specialists online. Pay securely in BDT, meet over
-							encrypted video, and walk away with a signed digital prescription —
+							encrypted video, and walk away with a signed digital prescription,
 							no waiting rooms, no phone trees.
 						</Typography>
 
 						{/* Search */}
-						<Box
-							sx={{
-								mt: 4.5,
-								bgcolor: "#fff",
-								border: "1px solid",
-								borderColor: "divider",
-								borderRadius: "20px",
-								p: 1,
-								display: "grid",
-								gridTemplateColumns: { xs: "1fr", sm: "1.2fr 1fr auto" },
-								gap: 0.5,
-								maxWidth: 580,
-								boxShadow: "0 24px 48px -16px rgba(15, 30, 46, 0.12)",
-							}}
-						>
-							<SearchField label="Specialty" value="Cardiology" />
-							<SearchField label="Date" value="Today, 27 May" />
-							<Button href="/doctors" startIcon={<SearchRoundedIcon />} sx={{ borderRadius: "14px", px: 3 }}>
-								Search
-							</Button>
-						</Box>
+						<HeroSearch />
 
 						{/* Trust */}
 						<Stack direction="row" sx={{ flexWrap: "wrap", gap: "20px 36px", mt: 4.5, alignItems: "baseline" }}>

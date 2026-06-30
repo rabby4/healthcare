@@ -41,7 +41,6 @@ const initialsOf = (name?: string) => {
 
 type ScalarForm = {
 	name: string
-	designation: string
 	gender: "MALE" | "FEMALE"
 	experience: string
 	contactNumber: string
@@ -53,7 +52,6 @@ type ScalarForm = {
 
 const EMPTY_FORM: ScalarForm = {
 	name: "",
-	designation: "",
 	gender: "MALE",
 	experience: "",
 	contactNumber: "",
@@ -193,7 +191,6 @@ const DoctorProfilePage = () => {
 		if (!profile) return
 		setForm({
 			name: profile.name ?? "",
-			designation: profile.designation ?? "",
 			gender: profile.gender === "FEMALE" ? "FEMALE" : "MALE",
 			experience:
 				profile.experience !== undefined && profile.experience !== null
@@ -237,7 +234,6 @@ const DoctorProfilePage = () => {
 		setAvatarPreview(null)
 		setForm({
 			name: profile.name ?? "",
-			designation: profile.designation ?? "",
 			gender: profile.gender === "FEMALE" ? "FEMALE" : "MALE",
 			experience:
 				profile.experience !== undefined && profile.experience !== null
@@ -278,7 +274,6 @@ const DoctorProfilePage = () => {
 		// 1) scalar fields (+ optional avatar) via update-my-profile
 		const payload = {
 			name: form.name.trim(),
-			designation: form.designation,
 			gender: form.gender,
 			experience: expNum || 0,
 			contactNumber: form.contactNumber,
@@ -348,7 +343,6 @@ const DoctorProfilePage = () => {
 	// Dirty-tracking: scalar fields vs seeded, avatar picked, or specialties changed.
 	const scalarDirty = profile
 		? form.name !== (profile.name ?? "") ||
-			form.designation !== (profile.designation ?? "") ||
 			form.gender !== (profile.gender === "FEMALE" ? "FEMALE" : "MALE") ||
 			form.experience !==
 				(profile.experience != null ? String(profile.experience) : "") ||
@@ -471,7 +465,7 @@ const DoctorProfilePage = () => {
 						<DemoTag />
 					</Box>
 					<Box sx={{ fontSize: 13 }}>
-						Verification status and certificate are illustrative — not live.
+						Verification status and certificate are illustrative, not live.
 					</Box>
 				</Box>
 			</Box>
@@ -482,7 +476,7 @@ const DoctorProfilePage = () => {
 					id="identity"
 					title="Identity & photo"
 					headRight={
-						<Box sx={eyebrowSx}>Doctor ID — {profile?.id?.slice(0, 8)}</Box>
+						<Box sx={eyebrowSx}>Doctor ID · {profile?.id?.slice(0, 8)}</Box>
 					}
 				>
 					<Box
@@ -589,12 +583,6 @@ const DoctorProfilePage = () => {
 							onChange={(e) => setField("name", e.target.value)}
 							placeholder="Dr. Jane Doe"
 						/>
-						<Field
-							label="Designation"
-							value={form.designation}
-							onChange={(e) => setField("designation", e.target.value)}
-							placeholder="Senior Consultant"
-						/>
 						<Box>
 							<Box component="label" sx={labelSx}>
 								Gender
@@ -622,7 +610,7 @@ const DoctorProfilePage = () => {
 						<Field
 							label="Email"
 							value={profile?.email ?? ""}
-							help="Email is your login — contact admin to change."
+							help="Email is your login. Contact admin to change."
 							slotProps={{
 								input: {
 									readOnly: true,
@@ -725,7 +713,7 @@ const DoctorProfilePage = () => {
 							sx={{ fontSize: 11, color: "text.secondary", mt: 0.75 }}
 						>
 							Stored as a single qualification summary. The verified
-							multi-certificate list is illustrative — not live.
+							multi-certificate list is illustrative, not live.
 						</Typography>
 					</Box>
 				</SectionCard>

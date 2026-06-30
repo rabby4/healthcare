@@ -118,7 +118,21 @@ const Footer = () => {
 						))}
 					</Stack>
 					<Typography sx={{ fontFamily: MONO, fontSize: 11, letterSpacing: "0.08em", textTransform: "uppercase", color: "rgba(255,255,255,0.45)" }}>
-						v1.0 · made in Dhaka
+						Developed by{" "}
+						<Box
+							component="a"
+							href="https://golam-rabby.vercel.app/"
+							target="_blank"
+							rel="noopener noreferrer"
+							sx={{
+								color: "rgba(255,255,255,0.7)",
+								textDecoration: "none",
+								transition: "color 160ms",
+								"&:hover": { color: "primary.main" },
+							}}
+						>
+							Golam Rabby
+						</Box>
 					</Typography>
 				</Stack>
 			</Container>

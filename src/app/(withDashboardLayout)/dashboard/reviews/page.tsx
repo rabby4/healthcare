@@ -38,7 +38,7 @@ const reviews: Review[] = [
 		flagged: true,
 		rating: 1,
 		ratingLabel: "1.0",
-		body: "Reported by 2 users — contains content that may violate community guidelines. Review and decide.",
+		body: "Reported by 2 users. Contains content that may violate community guidelines. Review and decide.",
 		actions: [
 			{ label: "Keep", kind: "ghost" },
 			{ label: "Remove review", kind: "danger" },
@@ -75,7 +75,7 @@ const reviews: Review[] = [
 		meta: "on Dr. Sadia Khan · 14 May",
 		rating: 5,
 		ratingLabel: "5.0",
-		body: "“Felt seen and heard. Followed up next day to check on me — really kind. Highly recommend.”",
+		body: "“Felt seen and heard. Followed up next day to check on me, really kind. Highly recommend.”",
 		actions: [{ label: "Hide", kind: "ghost" }],
 		verified: true,
 	},
@@ -309,7 +309,7 @@ const ReviewsPage = () => {
 				<Typography
 					sx={{ fontSize: 13, fontWeight: 600, color: "text.secondary" }}
 				>
-					Illustrative preview — not live data
+					Illustrative preview, not live data
 				</Typography>
 				<Chip
 					label="Preview"

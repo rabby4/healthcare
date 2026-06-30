@@ -9,7 +9,6 @@ import {
 	DialogContent,
 	DialogTitle,
 	IconButton,
-	MenuItem,
 	Stack,
 	TextField,
 	Typography,
@@ -47,7 +46,6 @@ type FormState = {
 	appointmentFee: string
 	qualification: string
 	currentWorkingPlace: string
-	designation: string
 }
 
 const emptyForm: FormState = {
@@ -61,7 +59,6 @@ const emptyForm: FormState = {
 	appointmentFee: "",
 	qualification: "",
 	currentWorkingPlace: "",
-	designation: "",
 }
 
 const FieldLabel = ({ children }: { children: React.ReactNode }) => (
@@ -129,7 +126,6 @@ const DoctorFormModal = ({ open, onClose, doctor }: Props) => {
 					doctor.appointmentFee != null ? String(doctor.appointmentFee) : "",
 				qualification: doctor.qualification ?? "",
 				currentWorkingPlace: doctor.currentWorkingPlace ?? "",
-				designation: doctor.designation ?? "",
 			})
 			setGender(doctor.gender === "MALE" ? "MALE" : "FEMALE")
 			setSelected(
@@ -194,7 +190,6 @@ const DoctorFormModal = ({ open, onClose, doctor }: Props) => {
 					appointmentFee: Number(form.appointmentFee),
 					qualification: form.qualification,
 					currentWorkingPlace: form.currentWorkingPlace,
-					designation: form.designation,
 					gender,
 					specialties: [...added, ...removed],
 				}
@@ -215,8 +210,8 @@ const DoctorFormModal = ({ open, onClose, doctor }: Props) => {
 						appointmentFee: Number(form.appointmentFee),
 						qualification: form.qualification,
 						currentWorkingPlace: form.currentWorkingPlace,
-						designation: form.designation,
 					},
+					specialties: selected,
 				}
 				const fd = new FormData()
 				fd.append("data", JSON.stringify(payload))
@@ -381,42 +376,6 @@ const DoctorFormModal = ({ open, onClose, doctor }: Props) => {
 						/>
 					</Box>
 					<Box>
-						<FieldLabel>Designation</FieldLabel>
-						<TextField
-							select
-							fullWidth
-							size="small"
-							sx={inputSx}
-							value={form.designation}
-							onChange={(e) => setField("designation")(e.target.value)}
-						>
-							<MenuItem value="" disabled>
-								<em>
-									{specialtiesLoading
-										? "Loading specialties…"
-										: specialties.length === 0
-											? "No specialties available"
-											: "Select a specialty"}
-								</em>
-							</MenuItem>
-							{/* Keep a legacy designation selectable in edit mode even if it
-							    no longer matches any specialty title */}
-							{form.designation &&
-								!specialties.some(
-									(s: ISpecialty) => s.title === form.designation
-								) && (
-									<MenuItem value={form.designation}>
-										{form.designation}
-									</MenuItem>
-								)}
-							{specialties.map((s: ISpecialty) => (
-								<MenuItem key={s.id} value={s.title}>
-									{s.title}
-								</MenuItem>
-							))}
-						</TextField>
-					</Box>
-					<Box>
 						<FieldLabel>Email (login)</FieldLabel>
 						<TextField
 							placeholder="name@medicare.app"
@@ -549,8 +508,8 @@ const DoctorFormModal = ({ open, onClose, doctor }: Props) => {
 						/>
 					</Box>
 
-					{/* Specialties — only editable in edit mode (create endpoint ignores them) */}
-					{isEdit && (
+					{/* Specialties — selectable on both create and edit */}
+					{(
 						<Box sx={{ gridColumn: { sm: "1 / -1" } }}>
 							<FieldLabel>Specialties</FieldLabel>
 							<Stack direction="row" sx={{ gap: 1, flexWrap: "wrap" }}>
